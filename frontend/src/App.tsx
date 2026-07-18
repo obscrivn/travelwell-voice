@@ -1,18 +1,36 @@
 import React, { useState } from 'react';
 import { runConciergeStream, parseMarkdownToRecommendations } from './api/client';
+import { ActionStatusList } from './components/ActionStatusList';
+import { ConversationTranscript } from './components/ConversationTranscript';
+import { ItineraryTimeline } from './components/ItineraryTimeline';
+import { TripContextCard } from './components/TripContextCard';
+import { VoicePanel } from './components/VoicePanel';
+import {
+  actionStatusItems,
+  agentActivityItems,
+  itineraryItems,
+  transcriptMessages,
+  tripContext,
+} from './data/tripPlaceholder';
+import type { VoicePreviewState } from './types/travel';
 import './App.css';
 import { 
   Sparkles, 
   AlertTriangle,
   Calendar,
-  Activity,
   Check,
   MapPin,
   ExternalLink,
   Phone,
   Clock,
-  Compass
+  Compass,
+  Plane,
+  Radio
 } from 'lucide-react';
+
+// Keep the existing wellness workflow available for a future secondary surface
+// without including its large legacy dashboard in the voice-first home page.
+const ENABLE_LEGACY_WELLNESS_UI = false;
 
 export interface Facility {
   id: string;
@@ -612,7 +630,18 @@ export default function App() {
   const [budgetSelection, setBudgetSelection] = useState("20");
   const [hasYmca, setHasYmca] = useState(true);
   const [freeTextPreferences, setFreeTextPreferences] = useState("");
+  const [voicePreviewState, setVoicePreviewState] = useState<VoicePreviewState>('Ready');
   const [selectedMemberships, setSelectedMemberships] = useState<string[]>(["YMCA"]);
+
+  const advanceVoicePreview = () => {
+    const previewSequence: VoicePreviewState[] = ['Ready', 'Connecting', 'Listening', 'Thinking', 'Speaking'];
+    const currentIndex = previewSequence.indexOf(voicePreviewState);
+    if (currentIndex === -1 || currentIndex === previewSequence.length - 1) {
+      setVoicePreviewState('Ready');
+      return;
+    }
+    setVoicePreviewState(previewSequence[currentIndex + 1]);
+  };
 
   const toggleMembership = (name: string) => {
     setSelectedMemberships(prev => {
@@ -905,33 +934,50 @@ export default function App() {
       <header className="top-nav">
         <div className="brand-section">
           <div className="brand-logo">
-            <Activity className="w-5 h-5" />
+            <Plane aria-hidden="true" />
           </div>
           <div>
-            <div className="brand-name">TravelWell AI</div>
-            <div className="brand-tagline">Find Your Perfect Workout. Anywhere. Anytime.</div>
+            <div className="brand-name">TravelWell Voice</div>
+            <div className="brand-tagline">Your trip, coordinated by conversation.</div>
           </div>
+        </div>
+        <div className="header-trip-status" aria-label="Demo trip status">
+          <div>
+            <span>Indianapolis to Chicago</span>
+            <strong>Jul 19–21</strong>
+          </div>
+          <span className="header-delay-indicator"><Radio aria-hidden="true" /> Delayed</span>
         </div>
       </header>
 
-      {/* 2. HERO GREETING */}
-      <section className="hero">
-        <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', margin: '0 0 4px 0' }}>
-          TravelWell AI
-        </h1>
-        <h2 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#2563eb', margin: '0 0 6px 0' }}>
-          Find Your Perfect Workout. Anywhere. Anytime.
-        </h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-          <span style={{ background: '#eff6ff', color: '#1e40af', fontSize: '0.725rem', fontWeight: 700, padding: '3px 8px', borderRadius: '4px' }}>
-            ⚡ Powered by Explainable Multi-Agent AI
-          </span>
-          <span style={{ background: '#ecfdf5', color: '#065f46', fontSize: '0.725rem', fontWeight: 700, padding: '3px 8px', borderRadius: '4px' }}>
-            🛡️ Every recommendation explained
-          </span>
+      <main className="voice-home-grid">
+        <div className="voice-home-primary">
+          <VoicePanel
+            state={voicePreviewState}
+            textValue={freeTextPreferences}
+            onTextChange={setFreeTextPreferences}
+            onMicPress={advanceVoicePreview}
+            onPreviewStateChange={setVoicePreviewState}
+          />
+          <ConversationTranscript messages={transcriptMessages} />
         </div>
-        <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '4px 0 0 0' }}>Compare fitness matches that fit your active memberships, travel schedule, and facility checklists.</p>
-      </section>
+        <div className="voice-home-context">
+          <TripContextCard trip={tripContext} />
+          <ItineraryTimeline items={itineraryItems} />
+        </div>
+        <ActionStatusList actions={actionStatusItems} activity={agentActivityItems} />
+      </main>
+
+      {ENABLE_LEGACY_WELLNESS_UI && (
+      <section className="legacy-wellness-section" aria-labelledby="wellness-search-title">
+        <div className="legacy-section-heading">
+          <div>
+            <div className="eyebrow">Existing TravelWell capability</div>
+            <h2 id="wellness-search-title">Wellness search</h2>
+            <p>Refine nearby indoor workout options. This section continues to use the existing backend workflow.</p>
+          </div>
+          <span>Secondary tool</span>
+        </div>
 
       {/* 3. DASHBOARD GRID (3 Columns: Form, Map, Vertical Workflow) */}
       <ErrorBoundary>
@@ -1681,6 +1727,8 @@ export default function App() {
         </ErrorBoundary>
       )}
 
+      </section>
+      )}
     </div>
   );
 }
