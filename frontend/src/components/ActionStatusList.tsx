@@ -1,4 +1,4 @@
-import { BedDouble, CircleDot, Dumbbell, Plane, Salad, TrainFront } from 'lucide-react';
+import { Activity, BedDouble, Car, CircleDot, Dumbbell, Plane, Salad, ShoppingBag, TrainFront } from 'lucide-react';
 import type { ActionStatusItem, AgentActivityItem, TravelCategory } from '../types/travel';
 import { StatusBadge } from './StatusBadge';
 
@@ -10,9 +10,12 @@ interface ActionStatusListProps {
 const categoryIcon: Record<TravelCategory, typeof Plane> = {
   flight: Plane,
   hotel: BedDouble,
+  rental: Car,
   ground: TrainFront,
   dining: Salad,
   wellness: Dumbbell,
+  activity: Activity,
+  shopping: ShoppingBag,
 };
 
 export function ActionStatusList({ actions, activity }: ActionStatusListProps) {

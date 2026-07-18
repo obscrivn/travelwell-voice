@@ -2,49 +2,44 @@ import { AlertCircle, Keyboard, Mic, MicOff } from 'lucide-react';
 import type { VoicePreviewState } from '../types/travel';
 import { StatusBadge } from './StatusBadge';
 
+// Extended states: 'Ready' | 'Connecting' | 'Listening' | 'Thinking' | 'Speaking' | 'Error' | 'Disconnected'
+export type ActiveVoiceState = VoicePreviewState | 'Disconnected';
+
 interface VoicePanelProps {
-  state: VoicePreviewState;
+  state: ActiveVoiceState;
   textValue: string;
   onTextChange: (value: string) => void;
   onMicPress: () => void;
-  onPreviewStateChange: (state: VoicePreviewState) => void;
+  onDisconnect?: () => void;
 }
 
-const voiceStateCopy: Record<VoicePreviewState, string> = {
-  Ready: 'Tell me what changed with your trip',
-  Connecting: 'Preparing the local voice preview…',
-  Listening: 'Listening for your trip update…',
-  Thinking: 'Organizing the request and trip context…',
-  Speaking: 'Presenting a preview response…',
-  Error: 'The preview could not connect. You can still type below.',
+const voiceStateCopy: Record<ActiveVoiceState, string> = {
+  Ready: 'Start your voice conversation',
+  Connecting: 'Establishing WebRTC session…',
+  Listening: 'Say something, I am listening…',
+  Thinking: 'Personalizing your travel recommendations…',
+  Speaking: 'Speaking agent response…',
+  Error: 'Session error. Typing fallback is active.',
+  Disconnected: 'Session ended cleanly. Click mic to restart.',
 };
-
-const previewStates: VoicePreviewState[] = [
-  'Ready',
-  'Connecting',
-  'Listening',
-  'Thinking',
-  'Speaking',
-  'Error',
-];
 
 export function VoicePanel({
   state,
   textValue,
   onTextChange,
   onMicPress,
-  onPreviewStateChange,
+  onDisconnect,
 }: VoicePanelProps) {
-  const isActive = state !== 'Ready' && state !== 'Error';
+  const isActive = state !== 'Ready' && state !== 'Disconnected' && state !== 'Error';
 
   return (
     <section className="voice-panel" aria-labelledby="voice-panel-title">
       <div className="section-heading-row">
         <div>
-          <div className="eyebrow">Voice preview</div>
-          <h1 id="voice-panel-title">Coordinate the change, out loud.</h1>
+          <div className="eyebrow">Voice agent room</div>
+          <h1 id="voice-panel-title">Coordinate hands-free</h1>
         </div>
-        <StatusBadge status={state} />
+        <StatusBadge status={state as any} />
       </div>
 
       <div className={`voice-stage voice-stage-${state.toLowerCase()}`} aria-live="polite">
@@ -52,7 +47,7 @@ export function VoicePanel({
           className="microphone-control"
           type="button"
           onClick={onMicPress}
-          aria-label={isActive ? `Voice preview is ${state}. Advance preview state` : 'Start local voice preview'}
+          aria-label={isActive ? `Voice session is ${state}. Press to disconnect` : 'Start voice conversation'}
           aria-pressed={isActive}
         >
           <span className="microphone-ring microphone-ring-one" aria-hidden="true" />
@@ -65,19 +60,13 @@ export function VoicePanel({
         </div>
       </div>
 
-      <div className="preview-state-control">
-        <label htmlFor="voice-preview-state">Preview state</label>
-        <select
-          id="voice-preview-state"
-          value={state}
-          onChange={(event) => onPreviewStateChange(event.target.value as VoicePreviewState)}
-        >
-          {previewStates.map((previewState) => (
-            <option key={previewState} value={previewState}>{previewState}</option>
-          ))}
-        </select>
-        <span>Local UI states only · no audio is captured</span>
-      </div>
+      {isActive && onDisconnect && (
+        <div className="voice-actions-row">
+          <button onClick={onDisconnect} className="disconnect-btn" type="button">
+            Disconnect Session
+          </button>
+        </div>
+      )}
 
       <div className="text-fallback">
         <div className="text-fallback-label">
@@ -88,12 +77,12 @@ export function VoicePanel({
           id="voice-text-fallback"
           value={textValue}
           onChange={(event) => onTextChange(event.target.value)}
-          placeholder="Example: Keep dinner healthy and make the workout no longer than 45 minutes."
+          placeholder="Example: I'm staying at the Marriott Downtown and renting from Hertz."
           rows={3}
         />
         <div className="text-fallback-note">
           <AlertCircle aria-hidden="true" />
-          This updates your trip preferences. It does not book or change travel.
+          Typing fallback sends updates straight to our travel intelligence engine.
         </div>
       </div>
     </section>

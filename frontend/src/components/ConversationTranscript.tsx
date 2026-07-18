@@ -16,6 +16,11 @@ export function ConversationTranscript({ messages }: ConversationTranscriptProps
       </div>
 
       <div className="transcript-list">
+        {messages.length === 0 && (
+          <div className="transcript-empty-state">
+            Connect voice or use the text fallback to choose Chicago or Austin.
+          </div>
+        )}
         {messages.map((message) => (
           <article key={message.id} className={`transcript-message transcript-${message.speaker}`}>
             <div className="transcript-meta">

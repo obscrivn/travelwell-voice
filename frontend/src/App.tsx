@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { runConciergeStream, parseMarkdownToRecommendations } from './api/client';
-import { ActionStatusList } from './components/ActionStatusList';
+import { ApprovalActions } from './components/ApprovalActions';
 import { ConversationTranscript } from './components/ConversationTranscript';
 import { ItineraryTimeline } from './components/ItineraryTimeline';
+import { ProactiveRecommendations } from './components/ProactiveRecommendations';
+import { TripSelector } from './components/TripSelector';
 import { TripContextCard } from './components/TripContextCard';
+import { TravelerProfileSetup } from './components/TravelerProfileSetup';
 import { VoicePanel } from './components/VoicePanel';
+import { WorkflowSection } from './components/WorkflowSection';
+import { KnowledgeSources } from './components/KnowledgeSources';
 import {
-  actionStatusItems,
-  agentActivityItems,
-  itineraryItems,
-  transcriptMessages,
-  tripContext,
+  approvalActions as mockApprovalActions,
+  itineraryItems as mockItineraryItems,
+  proactiveRecommendations as mockProactiveRecommendations,
+  travelerProfile,
+  upcomingTrips,
 } from './data/tripPlaceholder';
-import type { VoicePreviewState } from './types/travel';
+import type { TravelerProfile, TripContext } from './types/travel';
 import './App.css';
 import { 
   Sparkles, 
@@ -31,6 +36,54 @@ import {
 // Keep the existing wellness workflow available for a future secondary surface
 // without including its large legacy dashboard in the voice-first home page.
 const ENABLE_LEGACY_WELLNESS_UI = false;
+
+const RETURNING_TRAVELER_GREETING =
+  'Welcome back, Jim. I found two upcoming trips: Chicago this weekend and Austin next month. Which one are we working on?';
+
+type TripSelectionSource = 'voice' | 'card';
+
+function identifyTripFromText(text: string): string | null {
+  const normalized = text.toLowerCase();
+  if (normalized.includes('chicago')) return 'chicago';
+  if (normalized.includes('austin')) return 'austin';
+  return null;
+}
+
+function buildTripContext(tripId: string): TripContext {
+  if (tripId === 'chicago') {
+    return {
+      trip_id: 'chicago',
+      origin: 'Indianapolis',
+      destination: 'Chicago',
+      dates: 'Jul 19–21',
+      flight: {
+        flight_number: 'AA100',
+        origin: 'Indianapolis',
+        destination: 'Chicago',
+        eta: '6:40 PM',
+        status: 'Delayed',
+      },
+      hotel: null,
+      rental_car: null,
+      ground_transport: null,
+      trip_priorities: null,
+      missing_fields: ['hotel', 'rental_car', 'ground_transport', 'trip_priorities'],
+    };
+  }
+
+  return {
+    trip_id: 'austin',
+    origin: 'Indianapolis',
+    destination: 'Austin',
+    dates: 'Aug 8–11',
+    flight: null,
+    hotel: null,
+    rental_car: null,
+    ground_transport: null,
+    trip_priorities: null,
+    missing_fields: ['flight', 'hotel', 'rental_car', 'ground_transport', 'trip_priorities'],
+  } as TripContext;
+}
 
 export interface Facility {
   id: string;
@@ -78,7 +131,7 @@ export interface Recommendation {
   eligibility_status: 'Fits Your Criteria' | 'Alternative' | 'Rejected';
   card_summary: string;
   badge_subtitle: string;
-  
+
   // Canonical source of truth fields
   id?: string;
   place_id?: string;
@@ -630,17 +683,76 @@ export default function App() {
   const [budgetSelection, setBudgetSelection] = useState("20");
   const [hasYmca, setHasYmca] = useState(true);
   const [freeTextPreferences, setFreeTextPreferences] = useState("");
-  const [voicePreviewState, setVoicePreviewState] = useState<VoicePreviewState>('Ready');
+  const [voicePreviewState, setVoicePreviewState] = useState<any>('Ready');
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [savedTravelerProfile, setSavedTravelerProfile] = useState<TravelerProfile>(travelerProfile);
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [selectedMemberships, setSelectedMemberships] = useState<string[]>(["YMCA"]);
 
-  const advanceVoicePreview = () => {
-    const previewSequence: VoicePreviewState[] = ['Ready', 'Connecting', 'Listening', 'Thinking', 'Speaking'];
-    const currentIndex = previewSequence.indexOf(voicePreviewState);
-    if (currentIndex === -1 || currentIndex === previewSequence.length - 1) {
-      setVoicePreviewState('Ready');
-      return;
+  // Active state parameters matching the intelligence flow
+  const [tripContextState, setTripContextState] = useState<TripContext | null>(null);
+  const [proactiveRecs, setProactiveRecs] = useState<any[]>(mockProactiveRecommendations);
+  const [approvalActionsList, setApprovalActionsList] = useState<any[]>(mockApprovalActions);
+  const [itineraryTimelineItems, setItineraryTimelineItems] = useState<any[]>(mockItineraryItems);
+  const [transcriptMessages, setTranscriptMessages] = useState<any[]>([]);
+
+  // Vocal Bridge Room session
+  const [vbSession, setVbSession] = useState<any>(null);
+  const [simStep, setSimStep] = useState(0);
+  const greetingShownRef = React.useRef(false);
+
+  const appendReturningGreeting = () => {
+    if (greetingShownRef.current) return;
+    greetingShownRef.current = true;
+    setTranscriptMessages(prev => [
+      ...prev,
+      {
+        id: `msg-${Date.now()}-returning-greeting`,
+        speaker: 'assistant',
+        text: RETURNING_TRAVELER_GREETING,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        marker: 'Returning traveler',
+      },
+    ]);
+  };
+
+  const handleTripSelection = (tripId: string, source: TripSelectionSource) => {
+    const canonicalTripId = tripId === 'austin' ? 'austin' : 'chicago';
+    const trip = upcomingTrips.find(item => item.id === canonicalTripId);
+
+    setSelectedTripId(canonicalTripId);
+    setTripContextState(buildTripContext(canonicalTripId));
+    setProactiveRecs(canonicalTripId === 'chicago' ? mockProactiveRecommendations : []);
+    setItineraryTimelineItems(canonicalTripId === 'chicago' ? mockItineraryItems : []);
+    setApprovalActionsList(canonicalTripId === 'chicago' ? mockApprovalActions : []);
+
+    if (source === 'card' && trip) {
+      setSimStep(2);
+      const flightPrompt = canonicalTripId === 'chicago'
+        ? 'I have flight context for Chicago.'
+        : 'Flight details for Austin are still missing.';
+      setTranscriptMessages(prev => [
+        ...prev,
+        {
+          id: `msg-${Date.now()}-card-selection`,
+          speaker: 'assistant',
+          text: `${flightPrompt} What hotel are you staying at, will you need a rental car or ground transportation, and what are your trip priorities?`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          marker: 'Trip selected with accessible fallback',
+        },
+      ]);
+
+      if (vbSession?.sendAction) {
+        void vbSession.sendAction('trip_selected', {
+          trip_id: canonicalTripId,
+          destination: trip.destination,
+          dates: trip.dates,
+          selection_source: 'visual_fallback',
+        }).catch((error: unknown) => {
+          console.warn('Could not share the visual trip selection with the voice session.', error);
+        });
+      }
     }
-    setVoicePreviewState(previewSequence[currentIndex + 1]);
   };
 
   const toggleMembership = (name: string) => {
@@ -652,6 +764,361 @@ export default function App() {
       return next;
     });
   };
+
+  const handleDisconnect = () => {
+    if (vbSession) {
+      vbSession.disconnect();
+    }
+    setVbSession(null);
+    setVoicePreviewState('Disconnected');
+  };
+
+  const handleMicPress = async () => {
+    if (voicePreviewState !== 'Ready' && voicePreviewState !== 'Disconnected') {
+      handleDisconnect();
+      return;
+    }
+
+    try {
+      greetingShownRef.current = false;
+      setVoicePreviewState('Connecting');
+
+      const res = await fetch(`${config.apiBaseUrl}/api/voice-token`, { method: 'POST' });
+      const data = await res.json();
+
+      if (data.status === 'error' || !data.token || data.fallback) {
+        console.log("Vocal Bridge token endpoint returned error or fallback. Starting simulated voice preview.");
+        simulateVoiceConversation();
+        return;
+      }
+
+      // Dynamically load the SDK
+      const { VocalBridge } = await import('@vocalbridgeai/sdk');
+      const vb = new VocalBridge({
+        auth: {
+          tokenProvider: async () => ({
+            url: data.livekit_url || data.url,
+            token: data.token,
+            room_name: data.room_name,
+            participant_identity: data.participant_identity || "traveler",
+            expires_in: data.expires_in || 3600
+          } as any)
+        }
+      });
+
+      (vb as any).on('connectionStateChanged', (s: string) => {
+        if (s === 'connecting') setVoicePreviewState('Connecting');
+        else if (s === 'connected') {
+          setVoicePreviewState('Listening');
+          appendReturningGreeting();
+          setSimStep(1);
+        }
+        else if (s === 'speaking') setVoicePreviewState('Speaking');
+        else if (s === 'thinking') setVoicePreviewState('Thinking');
+        else if (s === 'disconnected') setVoicePreviewState('Disconnected');
+      });
+
+      (vb as any).on('transcript', ({ role, text }: { role: string, text: string }) => {
+        const identifiedTripId = role === 'user' ? identifyTripFromText(text) : null;
+        if (identifiedTripId) {
+          handleTripSelection(identifiedTripId, 'voice');
+          const trip = upcomingTrips.find(item => item.id === identifiedTripId);
+          void (vb as any).sendAction('trip_selected', {
+            trip_id: identifiedTripId,
+            destination: trip?.destination,
+            dates: trip?.dates,
+            selection_source: 'voice_transcript',
+          }).catch((error: unknown) => {
+            console.warn('Could not share the transcript trip selection with the voice agent.', error);
+          });
+        }
+        setTranscriptMessages(prev => [
+          ...prev,
+          {
+            id: `msg-${Date.now()}`,
+            speaker: role === 'user' ? 'traveler' : 'assistant',
+            text: text,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+      });
+
+      (vb as any).on('agentAction', async ({ action, payload }: { action: string, payload: any }) => {
+        if (action === 'update_itinerary_preview') {
+          setItineraryTimelineItems(payload.items);
+        } else if (action === 'request_action_approval') {
+          setApprovalActionsList(prev => [...prev, payload]);
+        }
+      });
+
+      await vb.connect();
+      setVbSession(vb);
+    } catch (err) {
+      console.error("Vocal Bridge connection failed:", err);
+      // Fallback to simulation
+      simulateVoiceConversation();
+    }
+  };
+
+  const simulateVoiceConversation = () => {
+    setVoicePreviewState('Connecting');
+    setTimeout(() => {
+      setVoicePreviewState('Listening');
+      appendReturningGreeting();
+      setSimStep(1);
+    }, 1200);
+  };
+
+  const handleSimulatedInput = (input: string) => {
+    const identifiedTripId = identifyTripFromText(input);
+
+    if (simStep === 1 && identifiedTripId) {
+      setVoicePreviewState('Thinking');
+      setTimeout(() => {
+        setVoicePreviewState('Speaking');
+        handleTripSelection(identifiedTripId, 'voice');
+        const selectedDestination = identifiedTripId === 'chicago' ? 'Chicago' : 'Austin';
+        const flightContext = identifiedTripId === 'chicago'
+          ? 'I have the available Chicago flight details.'
+          : 'The Austin trip is selected, but flight details are still missing.';
+        setTranscriptMessages(prev => [
+          ...prev,
+          {
+            id: `msg-${Date.now()}-user`,
+            speaker: 'traveler',
+            text: input,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          },
+          {
+            id: `msg-${Date.now()}-assistant-2`,
+            speaker: 'assistant',
+            text: `${flightContext} What hotel are you staying at, will you need a rental car or ground transportation, and what matters most for this trip to ${selectedDestination}?`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setSimStep(2);
+        setVoicePreviewState('Listening');
+      }, 1200);
+    } else if (simStep === 2 && (input.toLowerCase().includes('marriott') || input.toLowerCase().includes('hertz'))) {
+      setVoicePreviewState('Thinking');
+      setTimeout(() => {
+        setVoicePreviewState('Speaking');
+
+        // Update context details
+        const activeTripId = selectedTripId === 'austin' ? 'austin' : 'chicago';
+        const baseContext = buildTripContext(activeTripId);
+        const updatedContext = {
+          ...baseContext,
+          hotel: { name: 'Marriott Downtown', status: 'Confirmed' },
+          rental_car: { name: 'Hertz Rental', status: 'Confirmed' },
+          ground_transport: null,
+          dining: { style: 'Organic, High Protein' },
+          activities: [],
+          missing_fields: ['ground_transport', 'trip_priorities']
+        };
+        setTripContextState(updatedContext);
+
+        if (activeTripId === 'austin') {
+          setProactiveRecs([]);
+          setApprovalActionsList([]);
+          setItineraryTimelineItems([]);
+          setTranscriptMessages(prev => [
+            ...prev,
+            {
+              id: `msg-${Date.now()}-user`,
+              speaker: 'traveler',
+              text: input,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            },
+            {
+              id: `msg-${Date.now()}-assistant-austin-context`,
+              speaker: 'assistant',
+              text: 'Thanks. I have the Austin hotel and rental-car context. I still need the flight, ground transportation plan, and trip priorities before preparing travel intelligence cards.',
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              marker: 'Missing context'
+            }
+          ]);
+          setVoicePreviewState('Listening');
+          return;
+        }
+
+        // Recommendations
+        setProactiveRecs([
+          {
+            id: "lounge_1",
+            category: "wellness",
+            title: "AA Admirals Club (Concourse H/K)",
+            description: "Quiet workspaces, clean showers, and healthy salads.",
+            why_now: "Available during your layover / departure window.",
+            match_reason: "Complimentary access verified via Admirals Club membership.",
+            source: "sabre_loyalty_match",
+            confidence: "verified",
+            urgency: "normal",
+            proposed_action: {
+              id: "add_lounge",
+              action_type: "itinerary_addition",
+              label: "Add Lounge Access",
+              requires_approval: true,
+              integration_status: "preview"
+            }
+          },
+          {
+            id: "dining_1",
+            category: "dining",
+            title: "True Food Kitchen",
+            description: "Anti-inflammatory, organic dining within 5 mins walk of your hotel.",
+            why_now: "Dinner window fits perfectly before closing.",
+            match_reason: "High protein and organic choices match dietary preferences.",
+            source: "google_places",
+            confidence: "inferred",
+            urgency: "normal",
+            proposed_action: {
+              id: "add_dining",
+              action_type: "itinerary_addition",
+              label: "Add Dinner Suggestion",
+              requires_approval: true,
+              integration_status: "preview"
+            }
+          },
+          {
+            id: "retail_1",
+            category: "retail",
+            title: "Whole Foods Market",
+            description: "Organic grocery and prepared food bar, 8 mins walk.",
+            why_now: "Option to stock healthy room snacks tonight.",
+            match_reason: "Matches your preference for organic foods.",
+            source: "google_places",
+            confidence: "suggested",
+            urgency: "normal",
+            proposed_action: {
+              id: "add_wholefoods",
+              action_type: "itinerary_addition",
+              label: "Add Whole Foods stop",
+              requires_approval: true,
+              integration_status: "preview"
+            }
+          }
+        ]);
+
+        setApprovalActionsList([
+          {
+            id: "add_dining",
+            action_type: "itinerary_addition",
+            label: "Add True Food Kitchen",
+            requires_approval: true,
+            integration_status: "preview"
+          },
+          {
+            id: "add_workout",
+            action_type: "itinerary_addition",
+            label: "Add Marriott Gym Workout",
+            requires_approval: true,
+            integration_status: "preview"
+          }
+        ]);
+
+        setTranscriptMessages(prev => [
+          ...prev,
+          {
+            id: `msg-${Date.now()}-user`,
+            speaker: 'traveler',
+            text: input,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          },
+          {
+            id: `msg-${Date.now()}-assistant-3`,
+            speaker: 'assistant',
+            text: "Your arrival leaves enough time for hotel check-in and dinner. I found a lounge option before departure, a healthy dinner near your hotel, and a Whole Foods nearby. Your Hertz pickup is tomorrow morning, so no airport rental-car action is needed tonight.",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setSimStep(3);
+        setVoicePreviewState('Listening');
+      }, 1200);
+    } else if (simStep === 3 && (input.toLowerCase().includes('add') || input.toLowerCase().includes('workout') || input.toLowerCase().includes('skip'))) {
+      setVoicePreviewState('Thinking');
+      setTimeout(() => {
+        setVoicePreviewState('Speaking');
+
+        const updatedItinerary = [
+          {
+            id: 'flight',
+            category: 'flight',
+            time: '6:40 PM',
+            title: 'Arrive in Chicago',
+            detail: 'IND → ORD · estimated arrival',
+            status: 'Delayed',
+            kind: 'trip data',
+          },
+          {
+            id: 'ground',
+            category: 'ground',
+            time: '7:20 PM',
+            title: 'Ground transport downtown',
+            detail: 'Uber Black selection based on ground preferences',
+            status: 'Suggested',
+            kind: 'suggestion',
+          },
+          {
+            id: 'hotel',
+            category: 'hotel',
+            time: '8:05 PM',
+            title: 'Marriott Downtown Check-in',
+            detail: 'Loyalty tier recognized: Titanium Elite',
+            status: 'Confirmed',
+            kind: 'trip data',
+          },
+          {
+            id: 'dining',
+            category: 'dining',
+            time: '8:30 PM',
+            title: 'Healthy dinner nearby',
+            detail: 'True Food Kitchen proposed · no reservation made',
+            status: 'Needs approval',
+            kind: 'suggestion',
+          },
+          {
+            id: 'wellness',
+            category: 'wellness',
+            time: '9:20 PM',
+            title: 'Short indoor workout',
+            detail: 'Marriott Gym workout proposed',
+            status: 'Needs approval',
+            kind: 'suggestion',
+          }
+        ];
+        setItineraryTimelineItems(updatedItinerary as any);
+
+        setTranscriptMessages(prev => [
+          ...prev,
+          {
+            id: `msg-${Date.now()}-user`,
+            speaker: 'traveler',
+            text: input,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          },
+          {
+            id: `msg-${Date.now()}-assistant-4`,
+            speaker: 'assistant',
+            text: "I prepared a proposed itinerary with dinner at True Food Kitchen and a short Marriott Gym workout, and left out the Whole Foods stop. Nothing has been added externally and your approval is still required.",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setSimStep(4);
+        setVoicePreviewState('Ready');
+      }, 1200);
+    }
+  };
+
+  const handleTextChangeAndSim = (val: string) => {
+    setFreeTextPreferences(val);
+    // If the input ends with a return or is submitted, we run the sim check
+    if (val.endsWith('\n') || val.endsWith('.')) {
+      handleSimulatedInput(val.trim());
+      setFreeTextPreferences("");
+    }
+  };
+
   const [timeWindow, setTimeWindow] = useState("6:00 PM - 9:00 PM");
   
   // Required
@@ -671,6 +1138,7 @@ export default function App() {
   const [selectedRecId, setSelectedRecId] = useState<string>("");
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [dataWarning, setDataWarning] = useState<string | null>(null);
+
   const [resolvedLocation, setResolvedLocation] = useState<{
     display_name?: string;
     formatted_address?: string;
@@ -927,6 +1395,8 @@ export default function App() {
     }
   };
 
+  const selectedTrip = upcomingTrips.find(trip => trip.id === selectedTripId);
+
   return (
     <div className="app-container">
       
@@ -937,35 +1407,105 @@ export default function App() {
             <Plane aria-hidden="true" />
           </div>
           <div>
-            <div className="brand-name">TravelWell Voice</div>
-            <div className="brand-tagline">Your trip, coordinated by conversation.</div>
+            <div className="brand-name">TravelWell</div>
+            <div className="brand-tagline">Travel intelligence that knows what comes next.</div>
           </div>
         </div>
-        <div className="header-trip-status" aria-label="Demo trip status">
+        <div className="header-trip-status" aria-label="Current trip status">
           <div>
-            <span>Indianapolis to Chicago</span>
-            <strong>Jul 19–21</strong>
+            <span>{selectedTrip?.route || 'No trip selected'}</span>
+            <strong>{selectedTrip?.dates || 'Choose by voice or card'}</strong>
           </div>
-          <span className="header-delay-indicator"><Radio aria-hidden="true" /> Delayed</span>
+          <span className="header-delay-indicator trip-active-indicator"><Radio aria-hidden="true" /> {selectedTrip ? 'Trip active' : 'Ready'}</span>
         </div>
       </header>
 
-      <main className="voice-home-grid">
-        <div className="voice-home-primary">
-          <VoicePanel
-            state={voicePreviewState}
-            textValue={freeTextPreferences}
-            onTextChange={setFreeTextPreferences}
-            onMicPress={advanceVoicePreview}
-            onPreviewStateChange={setVoicePreviewState}
+      <main className="intelligence-home">
+        <section className="intelligence-intro" aria-labelledby="intelligence-title">
+          <div>
+            <div className="eyebrow">Proactive personal travel intelligence</div>
+            <h1 id="intelligence-title">Travel intelligence that knows what comes next.</h1>
+            <p>TravelWell builds understanding from trip data, persistent memory, and conversation—then turns that context into useful recommendations before you have to ask.</p>
+          </div>
+          <div className="product-principles" aria-label="Product capability model">
+            <span><strong>Sabre</strong> trip context</span>
+            <span><strong>TravelWell</strong> traveler intelligence</span>
+            <span><strong>Vocal Bridge</strong> conversation and actions</span>
+          </div>
+        </section>
+
+        <TravelerProfileSetup
+          profile={savedTravelerProfile}
+          isComplete={isProfileComplete}
+          onSave={(profile) => { setSavedTravelerProfile(profile); setIsProfileComplete(true); }}
+          onEdit={() => setIsProfileComplete(false)}
+        />
+
+        <WorkflowSection
+          step={2}
+          title="Start with a conversation"
+          description="Choose a trip, fill in missing details, or ask TravelWell to improve your journey."
+          state={isProfileComplete ? 'available' : 'locked'}
+          defaultOpen
+        >
+          <div className="interaction-workspace">
+            <VoicePanel
+              state={voicePreviewState}
+              textValue={freeTextPreferences}
+              onTextChange={handleTextChangeAndSim}
+              onMicPress={handleMicPress}
+              onDisconnect={handleDisconnect}
+            />
+            <ConversationTranscript messages={transcriptMessages} />
+          </div>
+          <TripSelector
+            trips={upcomingTrips}
+            selectedTripId={selectedTripId || ''}
+            onSelectTrip={(tripId) => handleTripSelection(tripId, 'card')}
           />
-          <ConversationTranscript messages={transcriptMessages} />
-        </div>
-        <div className="voice-home-context">
-          <TripContextCard trip={tripContext} />
-          <ItineraryTimeline items={itineraryItems} />
-        </div>
-        <ActionStatusList actions={actionStatusItems} activity={agentActivityItems} />
+        </WorkflowSection>
+
+        <WorkflowSection
+          step={3}
+          title="Current trip"
+          description="See what Sabre confirms, what you supplied, and what TravelWell still needs."
+          state={isProfileComplete ? 'available' : 'locked'}
+          defaultOpen
+          openSignal={selectedTripId}
+        >
+          <TripContextCard context={selectedTripId ? tripContextState : null} />
+        </WorkflowSection>
+
+        <WorkflowSection
+          step={4}
+          title="Travel Intelligence Cards"
+          description="Discoveries become more confident as Sabre, memory, and conversation add context."
+          state={isProfileComplete && selectedTripId && proactiveRecs.length > 0 ? 'available' : 'locked'}
+          defaultOpen
+        >
+          <ProactiveRecommendations recommendations={proactiveRecs} />
+          <KnowledgeSources />
+        </WorkflowSection>
+
+        <WorkflowSection
+          step={5}
+          title="Proposed Itinerary"
+          description="Preview removal, replacement, movement, or additions without changing external systems."
+          state={isProfileComplete && selectedTripId && itineraryTimelineItems.length > 0 ? 'available' : 'locked'}
+          defaultOpen
+        >
+          <ItineraryTimeline items={itineraryTimelineItems} />
+        </WorkflowSection>
+
+        <WorkflowSection
+          step={6}
+          title="Actions requiring approval"
+          description="Calls, requests, eligibility checks, transport, and itinerary additions wait for you."
+          state={isProfileComplete && selectedTripId && approvalActionsList.length > 0 ? 'available' : 'locked'}
+          defaultOpen
+        >
+          <ApprovalActions actions={approvalActionsList} />
+        </WorkflowSection>
       </main>
 
       {ENABLE_LEGACY_WELLNESS_UI && (
