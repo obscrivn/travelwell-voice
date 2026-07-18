@@ -54,6 +54,12 @@ export interface UpcomingTrip {
   detectionLabel: string;
   status: TravelStatus;
   route?: string;
+  airline?: string;
+  flightNumber?: string;
+  verificationLabel?: string;
+  missingContext?: string;
+  originCode?: string;
+  destinationCode?: string;
 }
 
 export interface TripSummary {

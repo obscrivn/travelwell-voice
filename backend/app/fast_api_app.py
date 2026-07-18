@@ -19,7 +19,7 @@ from collections.abc import AsyncIterator
 import google.auth
 from a2a.server.tasks import InMemoryTaskStore
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends, Header
 from google.adk.cli.fast_api import get_fast_api_app
 from google.adk.runners import Runner
 from google.cloud import logging as google_cloud_logging
@@ -140,6 +140,177 @@ def resolve_location(address: str) -> dict:
     """Resolves a landmark, neighborhood, venue or partial address using Geocoding."""
     from app.services.google_maps import geocode_address
     return geocode_address(address)
+
+
+@app.post("/api/voice-token")
+def get_voice_token():
+    import requests
+    import os
+    
+    vocal_bridge_key = os.getenv("VOCAL_BRIDGE_API_KEY")
+    vocal_bridge_agent_id = os.getenv("VOCAL_BRIDGE_AGENT_ID")
+    vocal_bridge_url = os.getenv("VOCAL_BRIDGE_URL", "https://vocalbridgeai.com")
+
+    if not vocal_bridge_key or vocal_bridge_key == "mock_key":
+        return {
+            "status": "error",
+            "message": "VOCAL_BRIDGE_API_KEY is not configured.",
+            "fallback": True
+        }
+
+    headers = {
+        "X-API-Key": vocal_bridge_key,
+        "Content-Type": "application/json"
+    }
+    if vocal_bridge_agent_id:
+        headers["X-Agent-Id"] = vocal_bridge_agent_id
+
+    try:
+        res = requests.post(
+            f"{vocal_bridge_url}/api/v1/token",
+            headers=headers,
+            json={"participant_name": "Traveler"},
+            timeout=5
+        )
+        if res.status_code == 200:
+            return res.json()
+        else:
+            return {
+                "status": "error",
+                "message": f"Vocal Bridge returned status {res.status_code}",
+                "fallback": True
+            }
+    except Exception as e:
+        return {"status": "error", "message": str(e), "fallback": True}
+
+
+def verify_travelwell_key(x_travelwell_key: str = Header(None, alias="X-TravelWell-Key")):
+    import os
+    expected_key = os.getenv("TRAVELWELL_TOOL_API_KEY", "hackathon_secret_key")
+    if x_travelwell_key != expected_key:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or missing X-TravelWell-Key header"
+        )
+
+
+@app.get("/api/trips", dependencies=[Depends(verify_travelwell_key)])
+def get_trips():
+    from app.tools.sabre_tools import list_upcoming_trips
+    return list_upcoming_trips()
+
+
+@app.post("/api/travel-intelligence", dependencies=[Depends(verify_travelwell_key)])
+def get_travel_intelligence(body: dict):
+    from app.tools.profile_tools import get_traveler_profile
+    from app.tools.sabre_tools import get_trip_context
+    from app.tools.intelligence_tools import generate_travel_intelligence
+    from app.tools.itinerary_tools import update_itinerary_preview
+    
+    profile_id = body.get("profile_id", "traveler_1")
+    trip_id = body.get("trip_id", "chicago_trip")
+    updates = body.get("context_updates", {})
+    user_request = body.get("user_message") or body.get("user_request", "")
+    approved_actions = body.get("approved_actions", [])
+    
+    profile = get_traveler_profile(profile_id)
+    trip_context = get_trip_context(trip_id)
+    
+    for key in ["hotel", "rental_car", "ground_transport", "dining"]:
+        if key in updates and updates[key]:
+            trip_context[key] = updates[key]
+            
+    missing = []
+    if not trip_context.get("hotel"):
+        missing.append("hotel")
+    if not trip_context.get("rental_car"):
+        missing.append("rental_car")
+    trip_context["missing_fields"] = missing
+    
+    recs = generate_travel_intelligence(trip_context, profile)
+    itinerary = update_itinerary_preview(trip_id, approved_actions)
+    
+    from app.tools.sabre_tools import list_upcoming_trips
+    trips = list_upcoming_trips()
+    selected_trip = next((t for t in trips if t["id"] == trip_id), trips[0])
+    
+    proposed_actions = []
+    for r in recs:
+        if r.get("proposed_action"):
+            proposed_actions.append(r["proposed_action"])
+            
+    spoken_summary = (
+        "Your Chicago trip context is ready. Since you are staying at the Marriott Downtown and renting from Hertz, "
+        "I recommend anti-inflammatory dining at True Food Kitchen which matches your organic and high-protein diet. "
+        "I also suggest an evening workout in the Marriott fitness center before check-out tomorrow."
+    )
+    
+    return {
+        "selected_trip": selected_trip,
+        "context": trip_context,
+        "follow_up_question": "Would you like me to add these options to your itinerary?" if missing else None,
+        "recommendations": recs,
+        "proposed_itinerary": itinerary,
+        "proposed_actions": proposed_actions,
+        "spoken_summary": spoken_summary
+    }
+
+
+@app.post("/api/trip-context")
+def update_trip_context_endpoint(body: dict):
+    from app.tools.itinerary_tools import build_trip_context
+    trip_id = body.get("trip_id", "chicago_trip")
+    updates = body.get("updates", {})
+    return build_trip_context(trip_id, updates)
+
+
+@app.post("/api/actions/{action_id}/decision", dependencies=[Depends(verify_travelwell_key)])
+def record_decision(action_id: str, body: dict):
+    from app.tools.itinerary_tools import update_itinerary_preview
+    trip_id = body.get("trip_id", "chicago_trip")
+    decision = body.get("decision", "approve")
+    
+    approved_actions = body.get("approved_actions", [])
+    if decision == "approve" and action_id not in approved_actions:
+        approved_actions.append(action_id)
+    elif decision == "reject" and action_id in approved_actions:
+        if action_id in approved_actions:
+            approved_actions.remove(action_id)
+        
+    itinerary = update_itinerary_preview(trip_id, approved_actions)
+    return {
+        "status": "success",
+        "action_id": action_id,
+        "decision": decision,
+        "proposed_itinerary": itinerary
+    }
+
+
+@app.get("/api/diagnostics/sabre")
+def sabre_diagnostics():
+    from app.tools.sabre_tools import get_sabre_headers, call_sabre_mcp
+    headers = get_sabre_headers()
+    mcp_configured = headers is not None
+    connection_successful = False
+    available_tools = []
+    
+    if mcp_configured:
+        mcp_res = call_sabre_mcp("tools/list")
+        if mcp_res and "result" in mcp_res:
+            connection_successful = True
+            raw_tools = mcp_res["result"].get("tools", [])
+            available_tools = [
+                {"name": t.get("name"), "description": t.get("description")} 
+                for t in raw_tools
+            ]
+            
+    return {
+        "mcp_configured": mcp_configured,
+        "connection_successful": connection_successful,
+        "available_filtered_tools": available_tools,
+        "fixture_fallback_active": not connection_successful
+    }
 
 
 def parse_markdown_to_recommendations(markdown: str, budget_sel: str = "20", has_ymca: bool = False, memberships: list = None, location_context: str = "") -> list:

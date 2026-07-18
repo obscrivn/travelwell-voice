@@ -41,7 +41,7 @@ export function ItineraryTimeline({ items }: ItineraryTimelineProps) {
         {items.map((item) => {
           const Icon = categoryIcon[item.category];
           return (
-            <li key={item.id} className={`itinerary-item itinerary-${item.kind.replace(' ', '-')}`}>
+            <li key={item.id} className={`itinerary-item itinerary-${item.kind.replace(' ', '-')} itinerary-category-${item.category}`}>
               <time>{item.time}</time>
               <span className="itinerary-node"><Icon aria-hidden="true" /></span>
               <div className="itinerary-copy">

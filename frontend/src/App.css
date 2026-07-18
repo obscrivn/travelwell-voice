@@ -2908,6 +2908,10 @@ a:focus-visible {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
   width: 100%;
 }
+
+.trip-selector-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
 .trip-selector-card:hover {
   border-color: #223831;
   background: rgba(255, 255, 255, 0.9);
@@ -3056,4 +3060,2305 @@ a:focus-visible {
 }
 .disconnect-btn:hover {
   background: #dc2626;
+}
+
+/* Returning traveler demo polish */
+.intelligence-intro {
+  position: relative;
+  isolation: isolate;
+  min-height: 250px;
+  overflow: hidden;
+  padding: 42px 34px 32px;
+  border: 1px solid #d8d2c7;
+  border-radius: 22px;
+  background: #f5f1e8;
+  box-shadow: 0 18px 48px rgba(48, 60, 53, 0.07);
+}
+
+.intelligence-intro::before,
+.intelligence-intro::after {
+  position: absolute;
+  z-index: -2;
+  content: '';
+  border: 1px solid rgba(89, 105, 96, 0.13);
+  border-radius: 26px;
+  background: rgba(255, 253, 247, 0.42);
+  transform: rotate(-7deg);
+}
+
+.intelligence-intro::before {
+  width: 280px;
+  height: 170px;
+  right: 80px;
+  top: 28px;
+}
+
+.intelligence-intro::after {
+  width: 210px;
+  height: 130px;
+  right: -22px;
+  bottom: -26px;
+  transform: rotate(8deg);
+}
+
+.travel-memory-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.travel-memory-atmosphere svg {
+  position: absolute;
+  right: 2%;
+  top: 12%;
+  width: min(47%, 560px);
+  fill: none;
+  stroke: rgba(63, 91, 78, 0.2);
+  stroke-dasharray: 4 9;
+  stroke-linecap: round;
+  stroke-width: 1.4;
+}
+
+.travel-memory-atmosphere circle {
+  fill: #6d887a;
+  stroke: none;
+}
+
+.airport-code {
+  position: absolute;
+  color: rgba(42, 62, 53, 0.07);
+  font-size: clamp(4rem, 8vw, 7.5rem);
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.airport-code-ind { right: 31%; top: 16%; }
+.airport-code-ord { right: -1%; bottom: -12%; }
+
+.memory-spark,
+.voice-particle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #85998f;
+  box-shadow: 0 0 0 5px rgba(133, 153, 143, 0.1);
+}
+
+.memory-spark-one { right: 39%; top: 23%; }
+.memory-spark-two { right: 7%; top: 32%; }
+
+.demo-experience-label {
+  margin-bottom: 3px;
+  padding: 5px 9px;
+  border: 1px solid #c9d9d0;
+  border-radius: 999px;
+  color: #3f604f !important;
+  background: #e5eee8;
+  font-weight: 780;
+}
+
+.traveler-profile-card {
+  display: block;
+  padding: 14px 16px;
+  border-color: #c9d3cc;
+  background: #f8f7f2;
+  box-shadow: 0 7px 20px rgba(49, 64, 56, 0.05);
+}
+
+.profile-memory-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.profile-memory-toggle {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.profile-memory-toggle:focus-visible {
+  outline: 2px solid #436554;
+  outline-offset: 5px;
+  border-radius: 8px;
+}
+
+.profile-card-lead {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-memory-title {
+  display: block;
+  margin-top: 2px;
+  color: #263831;
+  font-size: 0.9rem;
+  font-weight: 780;
+}
+
+.profile-memory-chevron {
+  width: 15px;
+  color: #728078;
+  transition: transform 180ms ease;
+}
+
+.profile-memory-expanded .profile-memory-chevron {
+  transform: rotate(180deg);
+}
+
+.profile-memory-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-connected-indicator,
+.account-connected-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border: 1px solid #c4d7cc !important;
+  border-radius: 999px;
+  color: #35604c !important;
+  background: #e4efe8 !important;
+  font-size: 0.61rem;
+  font-weight: 780;
+}
+
+.profile-connected-indicator svg,
+.profile-account-confirmation svg,
+.connection-option-connected svg {
+  width: 13px;
+  height: 13px;
+}
+
+.profile-memory-compact-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+  margin: 10px 0 0 50px;
+  color: #65726b;
+  font-size: 0.61rem;
+}
+
+.profile-memory-compact-summary span:not(:last-child)::after {
+  margin-left: 16px;
+  color: #b4bbb6;
+  content: '•';
+}
+
+.profile-memory-expanded .profile-summary-items {
+  margin: 14px 0 0 50px;
+  padding-top: 14px;
+  border-top: 1px solid #dedbd2;
+}
+
+.profile-account-confirmation {
+  display: flex;
+  align-items: center;
+  color: #3f654f !important;
+}
+
+.connection-option-connected {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border: 1px solid #c7d9cf;
+  border-radius: 7px;
+  color: #3f5f50;
+  background: #e7efe9;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.connection-option-connected small {
+  color: #52725f;
+  font-size: 0.52rem;
+  text-transform: uppercase;
+}
+
+.workflow-section {
+  border-color: #ccc6ba;
+  box-shadow: 0 4px 14px rgba(42, 55, 48, 0.035);
+}
+
+.workflow-section[open] {
+  border-color: #c3cec7;
+  box-shadow: 0 10px 30px rgba(45, 61, 52, 0.065);
+}
+
+.workflow-locked {
+  background: #f2f0ea;
+  box-shadow: none;
+}
+
+.interaction-workspace {
+  position: relative;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #c9d1cb;
+  border-radius: 18px;
+  background: #d7ddd8;
+}
+
+.interaction-workspace::after {
+  position: absolute;
+  top: 50%;
+  left: calc(55% - 4px);
+  z-index: 3;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6f887a;
+  box-shadow: 0 0 0 5px rgba(111, 136, 122, 0.13);
+  content: '';
+}
+
+.interaction-workspace .voice-panel,
+.interaction-workspace .conversation-panel {
+  border: 0;
+  border-radius: 0;
+}
+
+.interaction-workspace .voice-panel {
+  position: relative;
+  z-index: 1;
+  background: #f8f6ef;
+  box-shadow: inset -1px 0 #d2d7d3;
+}
+
+.interaction-workspace .conversation-panel {
+  background: #fbfaf6;
+}
+
+.voice-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin: 14px 0 4px;
+  border: 1px solid #d6dcd7;
+  border-radius: 18px;
+  background: #f1f2ed;
+}
+
+.voice-orbit {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.voice-route {
+  position: absolute;
+  border: 1px dashed rgba(79, 105, 92, 0.21);
+  border-radius: 50%;
+}
+
+.voice-route-one {
+  width: 270px;
+  height: 115px;
+  left: 50%;
+  top: 43%;
+  transform: translate(-50%, -50%) rotate(-9deg);
+}
+
+.voice-route-two {
+  width: 190px;
+  height: 190px;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+}
+
+.voice-particle-one { left: 20%; top: 30%; }
+.voice-particle-two { right: 20%; top: 42%; }
+.voice-particle-three { left: 34%; bottom: 21%; }
+
+.microphone-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.microphone-control {
+  width: 116px;
+  height: 116px;
+  border: 1px solid rgba(255, 255, 255, 0.44);
+  background: #243b32;
+  box-shadow: 0 20px 48px rgba(35, 58, 49, 0.25), inset 0 0 0 6px rgba(255, 255, 255, 0.045);
+}
+
+.microphone-ring-three {
+  inset: -38px;
+}
+
+.voice-stage-listening .microphone-control,
+.voice-stage-speaking .microphone-control {
+  background: #315346;
+}
+
+.voice-stage-connecting .microphone-control { background: #5f654d; }
+.voice-stage-thinking .microphone-control { background: #465d54; }
+
+.voice-stage-listening .microphone-ring-three,
+.voice-stage-thinking .microphone-ring-three,
+.voice-stage-speaking .microphone-ring-three {
+  opacity: 1;
+  animation: voice-ring-pulse 2.2s ease-out infinite 0.8s;
+}
+
+.voice-waveform {
+  position: absolute;
+  left: calc(100% + 23px);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  opacity: 0;
+}
+
+.voice-waveform i {
+  width: 3px;
+  height: 15px;
+  border-radius: 999px;
+  background: #6f897b;
+}
+
+.voice-stage-listening .voice-waveform,
+.voice-stage-speaking .voice-waveform {
+  opacity: 1;
+}
+
+.voice-stage-listening .voice-waveform i,
+.voice-stage-speaking .voice-waveform i {
+  animation: voice-wave 900ms ease-in-out infinite alternate;
+}
+
+.voice-waveform i:nth-child(2), .voice-waveform i:nth-child(4) { animation-delay: 140ms !important; }
+.voice-waveform i:nth-child(3) { animation-delay: 280ms !important; }
+
+.voice-stage-listening .voice-particle,
+.voice-stage-thinking .voice-particle,
+.voice-stage-speaking .voice-particle {
+  animation: voice-particle-drift 3.2s ease-in-out infinite alternate;
+}
+
+.voice-particle-two { animation-delay: 500ms !important; }
+.voice-particle-three { animation-delay: 900ms !important; }
+
+.voice-context-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid #d2ddd6;
+  border-radius: 999px;
+  color: #4e665a;
+  background: rgba(251, 250, 246, 0.76);
+  font-size: 0.66rem;
+  font-weight: 680;
+}
+
+.voice-context-line svg {
+  width: 13px;
+  height: 13px;
+}
+
+.trip-selector-card {
+  position: relative;
+  overflow: hidden;
+  border-color: #cbc5b9;
+  padding: 18px;
+  background: #fbfaf6;
+  box-shadow: 0 8px 22px rgba(45, 56, 50, 0.06);
+}
+
+.trip-selector-card::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: transparent;
+  content: '';
+}
+
+.trip-selector-card.selected {
+  border-color: #668273;
+  background: #f3f6f1;
+  box-shadow: 0 0 0 2px rgba(70, 101, 85, 0.18), 0 14px 30px rgba(42, 66, 54, 0.11);
+}
+
+.trip-selector-card.selected::before {
+  background: #4e715f;
+}
+
+.trip-selector-card .card-header {
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e6e2da;
+}
+
+.trip-discovery-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #627069;
+  font-size: 0.68rem;
+  font-weight: 670;
+}
+
+.trip-discovery-label svg {
+  width: 14px;
+  height: 14px;
+}
+
+.trip-selector-card .source-tag {
+  flex: 0 0 auto;
+  border: 1px solid #ddd8cf;
+  color: #707873;
+  background: #f1efe9;
+  font-size: 0.6rem;
+}
+
+.trip-selector-card .source-tag-verified {
+  border-color: #bfd4df;
+  color: #345f74;
+  background: #e7f0f3;
+}
+
+.trip-card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.trip-airline {
+  color: #6e7772;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+.trip-selector-card h3 {
+  margin-top: 3px;
+  font-size: 1.45rem;
+}
+
+.trip-card-facts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  margin-top: 10px;
+  color: #586660;
+  font-size: 0.72rem;
+}
+
+.trip-card-facts strong {
+  color: #273a32;
+  font-size: 0.8rem;
+}
+
+.trip-card-facts span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.trip-selector-context {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid #e8e4dc;
+}
+
+.trip-selector-context svg {
+  width: 14px;
+  height: 14px;
+  color: #9a6b3c;
+}
+
+.context-row {
+  position: relative;
+  border-color: #d9d4ca;
+  background: #faf9f5;
+}
+
+.context-row-verified {
+  border-color: #c2d5dd;
+  background: #f0f6f7;
+  box-shadow: inset 3px 0 #5c8393;
+}
+
+.context-row-provided {
+  border-color: #c8d9cf;
+  background: #f1f6f2;
+  box-shadow: inset 3px 0 #6f917e;
+}
+
+.context-row-missing {
+  border-style: dashed;
+  background: #f7f3ed;
+  box-shadow: inset 3px 0 #b48a62;
+}
+
+.connected-context-label {
+  border-color: #c6d9ce;
+  color: #3d654f;
+  background: #e6efe9;
+}
+
+.recommendation-grid {
+  border-color: #c9cfc9;
+  background: #c9cfc9;
+  box-shadow: 0 10px 26px rgba(47, 61, 53, 0.06);
+}
+
+.recommendation-card {
+  background: #f8faf6;
+}
+
+.approval-list {
+  border-color: #d7c9b7;
+  background: #f2ece3;
+}
+
+.approval-row {
+  border-color: #d7c9b7;
+  background: #fbf7f0;
+}
+
+@keyframes voice-wave {
+  from { transform: scaleY(0.45); }
+  to { transform: scaleY(1.35); }
+}
+
+@keyframes voice-particle-drift {
+  from { transform: translate3d(-3px, 4px, 0); opacity: 0.4; }
+  to { transform: translate3d(6px, -7px, 0); opacity: 0.95; }
+}
+
+@media (max-width: 1120px) {
+  .interaction-workspace::after { display: none; }
+  .interaction-workspace .voice-panel { box-shadow: inset 0 -1px #d2d7d3; }
+}
+
+@media (max-width: 820px) {
+  .intelligence-intro { min-height: 0; padding: 32px 24px; }
+  .travel-memory-atmosphere svg { width: 70%; opacity: 0.55; }
+  .profile-memory-compact-summary { margin-left: 0; }
+  .profile-memory-expanded .profile-summary-items { margin-left: 0; }
+}
+
+@media (max-width: 580px) {
+  .profile-memory-header { align-items: flex-start; flex-direction: column; }
+  .profile-memory-actions { width: 100%; justify-content: space-between; }
+  .profile-memory-compact-summary { flex-direction: column; }
+  .profile-memory-compact-summary span::after { display: none; }
+  .airport-code { opacity: 0.55; }
+  .voice-waveform { display: none; }
+  .trip-selector-grid { grid-template-columns: 1fr; }
+}
+
+/* Premium travel-object visual system */
+body {
+  background-color: #ebe8e1;
+}
+
+.top-nav {
+  padding: 15px 18px;
+  border: 1px solid rgba(199, 195, 185, 0.78);
+  border-radius: 16px;
+  background: rgba(249, 248, 244, 0.86);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.72), 0 5px 16px rgba(43, 53, 48, 0.035);
+}
+
+.intelligence-intro,
+.traveler-profile-card,
+.workflow-section {
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.72), 0 7px 20px rgba(38, 49, 43, 0.045);
+}
+
+.travel-memory-atmosphere {
+  background-image:
+    radial-gradient(circle at 78% 32%, rgba(32, 57, 77, 0.055) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 84% 68%, rgba(83, 119, 104, 0.05) 0 1.5px, transparent 2px);
+  background-size: 31px 31px, 43px 43px;
+}
+
+.workflow-section > summary {
+  min-height: 72px;
+  border-radius: 15px;
+  background: rgba(249, 248, 244, 0.52);
+}
+
+.workflow-section[open] > summary {
+  border-radius: 15px 15px 0 0;
+  background: #f5f5f0;
+  box-shadow: inset 0 -1px #d8d6ce;
+}
+
+.workflow-section[open] .workflow-step {
+  border-color: #8da498;
+  color: #f9f8f3;
+  background: #314c40;
+  box-shadow: 0 4px 12px rgba(43, 71, 58, 0.16);
+}
+
+.workflow-section h2 {
+  font-size: 0.91rem;
+  letter-spacing: -0.015em;
+}
+
+/* Boarding-pass trip cards */
+.trip-selector-card {
+  --ticket-ink: #183952;
+  --ticket-tint: #edf3f6;
+  min-height: 286px;
+  padding: 0;
+  border: 1px solid #bfc7cb;
+  border-radius: 18px;
+  background: #fcfbf7;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.9), 0 8px 20px rgba(29, 48, 58, 0.065);
+}
+
+.trip-card-austin {
+  --ticket-ink: #52666d;
+  --ticket-tint: #f0f2f1;
+  border-color: #c8ccc9;
+}
+
+.trip-selector-card::after {
+  position: absolute;
+  inset: auto 18px 58px;
+  height: 1px;
+  background: repeating-linear-gradient(to right, rgba(86, 102, 95, 0.25) 0 5px, transparent 5px 10px);
+  content: '';
+}
+
+.trip-selector-card .card-header {
+  min-height: 54px;
+  margin: 0;
+  padding: 14px 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ticket-ink) 15%, transparent);
+  background: var(--ticket-tint);
+}
+
+.trip-card-chicago .card-header {
+  color: #edf6fa;
+  background: #183952;
+}
+
+.trip-card-chicago .trip-discovery-label {
+  color: #d7e7ee;
+}
+
+.trip-card-chicago .source-tag-verified {
+  border-color: rgba(214, 235, 244, 0.34);
+  color: #e7f4f8;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.trip-ticket-route {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(90px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 22px 4px;
+  color: var(--ticket-ink);
+}
+
+.trip-ticket-route > strong {
+  font-size: 1.22rem;
+  font-weight: 820;
+  letter-spacing: 0.045em;
+}
+
+.trip-ticket-route-line {
+  position: relative;
+  height: 34px;
+}
+
+.trip-ticket-route-line > svg:first-child {
+  width: 100%;
+  height: 34px;
+  fill: none;
+  stroke: color-mix(in srgb, var(--ticket-ink) 42%, transparent);
+  stroke-dasharray: 3 6;
+  stroke-linecap: round;
+  stroke-width: 1.2;
+}
+
+.trip-ticket-route-line > svg:last-child {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  width: 17px;
+  height: 17px;
+  padding: 3px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--ticket-ink);
+  transform: translateX(-50%) rotate(12deg);
+}
+
+.trip-selector-card .card-body {
+  padding: 0 22px 18px;
+}
+
+.trip-card-title-row {
+  margin-top: 10px;
+}
+
+.trip-airline {
+  color: color-mix(in srgb, var(--ticket-ink) 72%, #6e7772);
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.trip-selector-card h3 {
+  color: var(--ticket-ink);
+}
+
+.trip-selector-card.selected {
+  border-color: #557891;
+  background: #fffefa;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8), 0 0 0 2px rgba(56, 91, 115, 0.2), 0 10px 26px rgba(27, 54, 72, 0.1);
+  transform: translateY(-1px);
+}
+
+.trip-selector-card.selected::before {
+  width: 4px;
+  background: var(--ticket-ink);
+}
+
+.trip-ticket-notch {
+  position: absolute;
+  top: 54px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #c5c1b7;
+  border-radius: 50%;
+  background: #ebe8e1;
+}
+
+.trip-ticket-notch-top { left: -9px; }
+.trip-ticket-notch-bottom { right: -9px; }
+
+.trip-selector-context {
+  margin-top: 18px;
+  padding-top: 14px;
+  color: #6c6255;
+}
+
+/* Current Journey flight and context strips */
+.context-items-list {
+  gap: 16px;
+}
+
+.journey-flight-strip {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 24px 18px;
+  border: 1px solid #9eb5c3;
+  border-radius: 16px;
+  color: #eaf3f7;
+  background: #173a53;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.12), 0 8px 20px rgba(22, 53, 75, 0.1);
+}
+
+.journey-flight-strip::after {
+  position: absolute;
+  right: -32px;
+  bottom: -48px;
+  width: 190px;
+  height: 120px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 50%;
+  content: '';
+  transform: rotate(-14deg);
+}
+
+.journey-flight-topline,
+.journey-flight-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.journey-flight-topline > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.journey-category-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #bcd0dc;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.journey-category-label svg {
+  width: 14px;
+  height: 14px;
+}
+
+.journey-flight-topline > div > strong {
+  font-size: 1rem;
+  letter-spacing: 0.035em;
+}
+
+.journey-delay-label {
+  padding: 6px 9px;
+  border: 1px solid rgba(248, 195, 162, 0.3);
+  border-radius: 999px;
+  color: #ffd7c1;
+  background: rgba(154, 72, 43, 0.22);
+  font-size: 0.62rem;
+  font-weight: 760;
+}
+
+.journey-route-lockup {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.7fr) minmax(140px, 1.4fr) minmax(110px, 0.7fr);
+  align-items: center;
+  gap: 18px;
+  margin: 24px 0 20px;
+}
+
+.journey-airport {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.journey-airport-arrival {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.journey-airport > strong {
+  color: #fff;
+  font-size: clamp(1.8rem, 4vw, 3.25rem);
+  font-weight: 760;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.journey-airport > span {
+  color: #afc4d0;
+  font-size: 0.59rem;
+}
+
+.journey-airport > time {
+  margin-top: 5px;
+  color: #f1f6f8;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.journey-route-line {
+  position: relative;
+  height: 54px;
+}
+
+.journey-route-line svg {
+  width: 100%;
+  height: 48px;
+  fill: none;
+  stroke: rgba(208, 228, 238, 0.48);
+  stroke-dasharray: 4 7;
+  stroke-linecap: round;
+  stroke-width: 1.4;
+}
+
+.journey-route-line > svg + svg {
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  border-radius: 50%;
+  color: #173a53;
+  background: #dbe8ee;
+  transform: translateX(-50%) rotate(10deg);
+}
+
+.journey-route-line > span {
+  position: absolute;
+  bottom: 13px;
+  width: 7px;
+  height: 7px;
+  border: 2px solid #d5e6ed;
+  border-radius: 50%;
+  background: #173a53;
+}
+
+.journey-route-line > span:first-child { left: 1px; }
+.journey-route-line > span:last-child { right: 1px; }
+
+.journey-flight-meta {
+  justify-content: flex-start;
+  padding-top: 14px;
+  border-top: 1px solid rgba(215, 232, 240, 0.16);
+}
+
+.journey-flight-meta > span:not(.source-badge) {
+  display: grid;
+  grid-template-columns: 14px auto;
+  gap: 1px 6px;
+  min-width: 150px;
+}
+
+.journey-flight-meta svg {
+  grid-row: 1 / 3;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  color: #9eb8c6;
+}
+
+.journey-flight-meta small {
+  color: #9eb8c6;
+  font-size: 0.51rem;
+  text-transform: uppercase;
+}
+
+.journey-flight-meta strong {
+  color: #eef5f7;
+  font-size: 0.64rem;
+}
+
+.journey-flight-meta .sabre-source {
+  margin-left: auto;
+  border: 1px solid rgba(191, 219, 232, 0.28);
+  color: #d9edf5;
+  background: rgba(218, 238, 246, 0.1);
+}
+
+.context-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.context-secondary-grid .context-row {
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  gap: 10px;
+  min-height: 76px;
+  padding: 12px 14px;
+}
+
+.context-strip-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+}
+
+.context-strip-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.context-row-hotel {
+  border-color: #d9c6ab;
+  background: #faf4e9;
+  box-shadow: inset 3px 0 #b78b55;
+}
+
+.context-row-hotel .context-strip-icon {
+  color: #805f35;
+  background: #efe1ca;
+}
+
+.context-row-rental,
+.context-row-ground {
+  border-color: #bcd2cf;
+  background: #eef6f4;
+  box-shadow: inset 3px 0 #5c8883;
+}
+
+.context-row-rental .context-strip-icon,
+.context-row-ground .context-strip-icon {
+  color: #3e6c68;
+  background: #dceae7;
+}
+
+.context-row-priorities {
+  border-color: #cfc7dc;
+  background: #f4f1f8;
+  box-shadow: inset 3px 0 #83739a;
+}
+
+.context-row-priorities .context-strip-icon {
+  color: #65547c;
+  background: #e7e0ef;
+}
+
+.context-secondary-grid .context-row-missing {
+  border-style: dashed;
+  filter: saturate(0.62);
+}
+
+/* Category accents across itinerary and intelligence */
+.itinerary-item {
+  --category-color: #63796e;
+  --category-surface: #e9efeb;
+}
+
+.itinerary-category-flight { --category-color: #244f6a; --category-surface: #e4eef3; }
+.itinerary-category-hotel { --category-color: #8a673c; --category-surface: #f2e7d6; }
+.itinerary-category-ground,
+.itinerary-category-rental { --category-color: #467873; --category-surface: #dfedeb; }
+.itinerary-category-dining { --category-color: #ad654d; --category-surface: #f5e3dc; }
+.itinerary-category-wellness { --category-color: #5f7f60; --category-surface: #e4eee2; }
+.itinerary-category-activity { --category-color: #716285; --category-surface: #ebe6f1; }
+.itinerary-category-shopping { --category-color: #8a7045; --category-surface: #f1eadb; }
+
+.itinerary-item .itinerary-node {
+  border-color: color-mix(in srgb, var(--category-color) 40%, #fff);
+  color: var(--category-color);
+  background: var(--category-surface);
+  box-shadow: 0 0 0 4px #f8f7f2;
+}
+
+.itinerary-item .itinerary-copy {
+  margin-bottom: 10px;
+  padding: 10px 12px 12px;
+  border: 1px solid color-mix(in srgb, var(--category-color) 16%, #d7d2c8);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--category-surface) 48%, #fbfaf6);
+}
+
+.recommendation-card {
+  --intelligence-accent: #796b94;
+  --intelligence-surface: #f0edf5;
+  position: relative;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.82);
+}
+
+.recommendation-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--intelligence-accent);
+  content: '';
+}
+
+.recommendation-category-lounge { --intelligence-accent: #315d79; --intelligence-surface: #e6eff4; }
+.recommendation-category-dining { --intelligence-accent: #c07157; --intelligence-surface: #f6e8e1; }
+.recommendation-category-wellness,
+.recommendation-category-recovery { --intelligence-accent: #6b8968; --intelligence-surface: #e8f0e5; }
+.recommendation-category-weather { --intelligence-accent: #5d86a1; --intelligence-surface: #e8f1f6; }
+.recommendation-category-ground,
+.recommendation-category-rental { --intelligence-accent: #4f817c; --intelligence-surface: #e2efed; }
+.recommendation-category-retail { --intelligence-accent: #a07d48; --intelligence-surface: #f3ecdf; }
+.recommendation-category-workspace { --intelligence-accent: #7b6c98; --intelligence-surface: #eee9f4; }
+
+.recommendation-card .recommendation-icon {
+  color: var(--intelligence-accent);
+  background: var(--intelligence-surface);
+}
+
+.recommendation-card .traveler-fit {
+  border-left-color: var(--intelligence-accent);
+  background: color-mix(in srgb, var(--intelligence-surface) 62%, #fbfaf6);
+}
+
+.intelligence-section-heading {
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.intelligence-section-heading::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #315d79, #6c8b6a 38%, #806f9a 72%, transparent);
+  opacity: 0.58;
+  content: '';
+}
+
+.approval-section {
+  padding: 24px;
+  border: 1px solid #d6c7b4 !important;
+  border-radius: 14px;
+  background: #f7f1e8 !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.75);
+}
+
+.approval-heading-icon {
+  color: #7b6039;
+  background: #eadcc5;
+}
+
+.approval-row {
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.78);
+}
+
+/* Voice surface depth */
+.interaction-workspace .voice-panel {
+  background: #f2f3ee;
+}
+
+.voice-stage {
+  border-color: #bdcbc4;
+  background: #e9eee9;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.9), inset 0 -18px 50px rgba(66, 91, 78, 0.045);
+}
+
+.microphone-control {
+  box-shadow:
+    0 0 0 8px rgba(77, 111, 94, 0.055),
+    0 0 34px rgba(73, 110, 91, 0.18),
+    0 18px 38px rgba(31, 55, 45, 0.22),
+    inset 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.voice-stage-listening .microphone-control {
+  box-shadow: 0 0 0 10px rgba(70, 126, 98, 0.08), 0 0 42px rgba(64, 130, 96, 0.26), 0 18px 38px rgba(31, 71, 51, 0.2);
+}
+
+.voice-stage-speaking .microphone-control {
+  box-shadow: 0 0 0 10px rgba(72, 104, 132, 0.075), 0 0 42px rgba(63, 101, 132, 0.23), 0 18px 38px rgba(30, 56, 75, 0.2);
+}
+
+.text-fallback {
+  padding: 14px;
+  border: 1px solid #d1cdc3;
+  border-radius: 12px;
+  background: #fbfaf6;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.88);
+}
+
+@media (max-width: 820px) {
+  .journey-route-lockup { grid-template-columns: 0.8fr 1fr 0.8fr; }
+  .journey-flight-meta { align-items: flex-start; flex-wrap: wrap; }
+  .journey-flight-meta .sabre-source { margin-left: 0; }
+  .context-secondary-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 580px) {
+  .top-nav { padding: 13px 14px; }
+  .journey-flight-strip { padding: 18px 16px; }
+  .journey-flight-topline { align-items: flex-start; flex-direction: column; }
+  .journey-route-lockup { grid-template-columns: 1fr 0.75fr 1fr; gap: 8px; }
+  .journey-airport > strong { font-size: 1.65rem; }
+  .journey-route-line > svg + svg { width: 20px; height: 20px; }
+  .context-secondary-grid .context-row { grid-template-columns: 34px 1fr; }
+  .context-secondary-grid .source-badge { grid-column: 2; justify-self: start; }
+}
+
+/* Future-of-travel art direction */
+body {
+  background: #f4f7fb;
+  color: #101b2e;
+}
+
+.app-container {
+  max-width: 1520px;
+  gap: 18px;
+  padding-top: 18px;
+}
+
+.top-nav {
+  padding: 10px 4px 16px;
+  border: 0;
+  border-bottom: 1px solid #d9e1ec;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.brand-logo {
+  background: #0b1b35;
+  box-shadow: 0 7px 22px rgba(14, 42, 78, 0.2);
+}
+
+.intelligence-home {
+  gap: 34px;
+}
+
+/* Destination-led midnight hero */
+.intelligence-intro {
+  min-height: 410px;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 0.32fr);
+  align-items: center;
+  padding: 54px clamp(28px, 5vw, 74px) 46px;
+  border: 0;
+  border-radius: 0 0 56px 0;
+  color: #f8fbff;
+  background:
+    radial-gradient(circle at 78% 22%, rgba(77, 219, 255, 0.28), transparent 24%),
+    radial-gradient(circle at 61% 106%, rgba(34, 221, 151, 0.22), transparent 29%),
+    radial-gradient(circle at 34% -18%, rgba(109, 87, 255, 0.36), transparent 35%),
+    radial-gradient(circle at 95% 76%, rgba(255, 106, 129, 0.22), transparent 24%),
+    linear-gradient(120deg, #071225 0%, #0b1730 42%, #111a42 72%, #07182c 100%);
+  box-shadow: 0 24px 70px rgba(5, 19, 43, 0.2);
+}
+
+.intelligence-intro::before {
+  width: 340px;
+  height: 205px;
+  right: 6%;
+  top: 16%;
+  border-color: rgba(202, 228, 255, 0.13);
+  border-radius: 28px 8px 28px 8px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.07);
+  transform: rotate(-6deg);
+}
+
+.intelligence-intro::after {
+  width: 260px;
+  height: 156px;
+  right: -28px;
+  bottom: -38px;
+  border-color: rgba(142, 234, 222, 0.1);
+  background: rgba(28, 211, 178, 0.025);
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.intelligence-intro .eyebrow {
+  color: #81e8ff;
+}
+
+.intelligence-intro h1 {
+  max-width: 910px;
+  color: #f9fbff;
+  font-size: clamp(3rem, 6.2vw, 6.5rem);
+  font-weight: 670;
+  letter-spacing: -0.068em;
+  line-height: 0.88;
+  text-wrap: balance;
+}
+
+.intelligence-intro p {
+  max-width: 680px;
+  color: #bac8df;
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.hero-live-context {
+  width: fit-content;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 10px;
+  margin-top: 24px;
+  padding: 10px 12px;
+  border: 1px solid rgba(158, 211, 255, 0.18);
+  border-radius: 12px;
+  color: #d9e5f7;
+  background: rgba(5, 15, 38, 0.52);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  font-size: 0.64rem;
+}
+
+.hero-live-context span {
+  white-space: nowrap;
+}
+
+.hero-live-context span:first-child {
+  color: #ffb59f;
+}
+
+.hero-live-context strong {
+  color: #fff;
+}
+
+.hero-live-context i {
+  color: #60dfff;
+  font-style: normal;
+}
+
+.product-principles {
+  position: relative;
+  z-index: 2;
+  align-items: flex-start;
+  justify-self: end;
+  padding: 18px;
+  border-left: 1px solid rgba(154, 204, 255, 0.16);
+  color: #c8d5e8;
+}
+
+.product-principles span {
+  color: #aabbd4;
+}
+
+.product-principles strong {
+  color: #f6f9ff;
+}
+
+.demo-experience-label {
+  border-color: rgba(95, 231, 255, 0.26);
+  color: #9eefff !important;
+  background: rgba(28, 190, 222, 0.1);
+}
+
+.travel-memory-atmosphere {
+  background-image:
+    radial-gradient(circle at 77% 31%, rgba(118, 230, 255, 0.085) 0 2px, transparent 2.5px),
+    radial-gradient(circle at 86% 69%, rgba(133, 107, 255, 0.07) 0 1.5px, transparent 2px);
+  opacity: 1;
+}
+
+.travel-memory-atmosphere svg {
+  width: min(52%, 660px);
+  stroke: rgba(116, 225, 255, 0.36);
+}
+
+.travel-memory-atmosphere path {
+  stroke-dasharray: 7 10;
+  animation: hero-route-draw 2.8s ease-out both;
+}
+
+.travel-memory-atmosphere circle {
+  fill: #6fe1ff;
+  animation: destination-node-pulse 2.8s ease-in-out 1.6s infinite;
+}
+
+.airport-code {
+  color: rgba(230, 242, 255, 0.055);
+  font-size: clamp(6rem, 13vw, 12rem);
+}
+
+.memory-spark {
+  background: #73e5ff;
+  box-shadow: 0 0 0 6px rgba(88, 222, 255, 0.08), 0 0 18px rgba(92, 230, 255, 0.4);
+}
+
+/* Traveler Memory as identity signal */
+.traveler-profile-card {
+  position: relative;
+  overflow: hidden;
+  padding: 15px 18px;
+  border: 1px solid rgba(66, 225, 168, 0.22);
+  border-radius: 18px 5px 18px 5px;
+  color: #ecfff7;
+  background:
+    radial-gradient(circle at 82% -40%, rgba(58, 235, 169, 0.21), transparent 36%),
+    linear-gradient(105deg, #071d28, #0b2d35 52%, #0e3a3a);
+  box-shadow: 0 14px 34px rgba(8, 37, 43, 0.14), inset 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.traveler-profile-card::after {
+  position: absolute;
+  right: 18%;
+  bottom: -34px;
+  width: 180px;
+  height: 90px;
+  border: 1px solid rgba(111, 255, 205, 0.07);
+  border-radius: 50%;
+  content: '';
+}
+
+.profile-avatar {
+  position: relative;
+  color: #a9ffdc;
+  background: rgba(70, 226, 170, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(111, 247, 199, 0.16), 0 0 22px rgba(51, 226, 165, 0.12);
+}
+
+.memory-signal {
+  position: absolute;
+  inset: -5px;
+  border: 1px solid rgba(86, 245, 185, 0.22);
+  border-radius: 50%;
+  animation: memory-signal-pulse 2.8s ease-out infinite;
+}
+
+.memory-signal-two {
+  inset: -11px;
+  animation-delay: 0.65s;
+}
+
+.traveler-profile-card .eyebrow {
+  color: #79dcb8;
+}
+
+.profile-memory-title {
+  color: #f3fff9;
+  font-size: 0.94rem;
+}
+
+.profile-memory-assurance {
+  display: block;
+  margin-top: 3px;
+  color: #9abdb1;
+  font-size: 0.56rem;
+}
+
+.profile-memory-chevron {
+  color: #85baa8;
+}
+
+.profile-connected-indicator {
+  border-color: rgba(82, 240, 181, 0.24) !important;
+  color: #b6ffdf !important;
+  background: rgba(58, 220, 162, 0.11) !important;
+}
+
+.traveler-profile-card .profile-edit-button {
+  border: 1px solid rgba(173, 237, 214, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-memory-compact-summary {
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.profile-memory-compact-summary span {
+  padding: 5px 8px;
+  border: 1px solid rgba(153, 222, 199, 0.12);
+  border-radius: 999px;
+  color: #b6d3ca;
+  background: rgba(255, 255, 255, 0.045);
+  white-space: nowrap;
+}
+
+.profile-memory-compact-summary span::after {
+  display: none;
+}
+
+.profile-memory-compact-summary .profile-travel-style {
+  border-color: rgba(116, 244, 198, 0.2);
+  color: #b9ffe3;
+  background: rgba(59, 216, 161, 0.1);
+}
+
+.profile-memory-expanded .profile-summary-items {
+  border-top-color: rgba(165, 225, 204, 0.12);
+}
+
+.traveler-profile-card .profile-summary-items span,
+.traveler-profile-card .profile-summary-items strong {
+  color: #bdd1ca;
+}
+
+/* Open-canvas journey chapters */
+.workflow-section.workflow-available {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.workflow-section.workflow-available > summary,
+.workflow-section.workflow-available[open] > summary {
+  min-height: 64px;
+  padding: 14px 2px;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: inset 0 -1px #dce3ed;
+}
+
+.workflow-section.workflow-available .workflow-step {
+  border-color: #b7c4d6;
+  color: #34516f;
+  background: #edf3fb;
+  box-shadow: none;
+}
+
+.workflow-section.workflow-available[open] .workflow-step {
+  border-color: #557bff;
+  color: #fff;
+  background: linear-gradient(135deg, #2a6df4, #774eff);
+  box-shadow: 0 6px 20px rgba(66, 91, 232, 0.24);
+}
+
+.workflow-section h2 {
+  color: #101d34;
+  font-size: 0.98rem;
+}
+
+.workflow-section summary p {
+  color: #718096;
+}
+
+.workflow-content {
+  padding: 0 0 38px;
+}
+
+.workflow-content > .trip-context-panel,
+.workflow-content > .recommendation-section,
+.workflow-content > .approval-section,
+.workflow-content > .itinerary-panel {
+  border-top: 0;
+  padding-top: 28px;
+}
+
+.workflow-locked {
+  border: 0;
+  border-top: 1px dashed #cbd5e3;
+  border-bottom: 1px dashed #cbd5e3;
+  border-radius: 0;
+  background: rgba(231, 236, 245, 0.46);
+  box-shadow: none;
+}
+
+/* Voice intelligence portal */
+.interaction-workspace {
+  grid-template-columns: minmax(0, 1.18fr) minmax(330px, 0.82fr);
+  gap: 1px;
+  padding: 0;
+  border: 0;
+  border-radius: 32px 6px 32px 6px;
+  background: rgba(83, 116, 174, 0.2);
+  box-shadow: 0 24px 60px rgba(10, 25, 57, 0.17);
+}
+
+.interaction-workspace::after {
+  display: none;
+}
+
+.interaction-workspace .voice-panel {
+  padding: 34px;
+  color: #edf5ff;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(255, 76, 160, 0.2), transparent 24%),
+    radial-gradient(circle at 24% 78%, rgba(43, 220, 255, 0.18), transparent 31%),
+    radial-gradient(circle at 92% 16%, rgba(117, 80, 255, 0.25), transparent 29%),
+    linear-gradient(145deg, #07152e, #101c43 56%, #17184a);
+  box-shadow: none;
+}
+
+.voice-panel .eyebrow {
+  color: #ff8dca;
+}
+
+.voice-panel .section-heading-row h1 {
+  color: #f8fbff;
+  font-size: clamp(2rem, 3.7vw, 4rem);
+  line-height: 0.96;
+}
+
+.voice-panel .status-badge {
+  border-color: rgba(118, 225, 255, 0.28);
+  color: #a9f0ff;
+  background: rgba(67, 189, 224, 0.1);
+}
+
+.voice-stage {
+  min-height: 390px;
+  margin-top: 20px;
+  border-color: rgba(118, 198, 255, 0.13);
+  color: #f2f7ff;
+  background:
+    radial-gradient(circle at 50% 43%, rgba(93, 78, 255, 0.2), transparent 28%),
+    rgba(3, 12, 33, 0.42);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.04), inset 0 -30px 80px rgba(39, 23, 110, 0.12);
+}
+
+.voice-route-one {
+  width: 340px;
+  height: 145px;
+  border-color: rgba(75, 219, 255, 0.25);
+}
+
+.voice-route-two {
+  width: 230px;
+  height: 230px;
+  border-color: rgba(255, 101, 182, 0.18);
+}
+
+.voice-particle {
+  background: #78e9ff;
+  box-shadow: 0 0 0 5px rgba(75, 220, 255, 0.08), 0 0 16px rgba(75, 220, 255, 0.5);
+}
+
+.voice-particle-two {
+  background: #ff73bd;
+  box-shadow: 0 0 0 5px rgba(255, 88, 176, 0.08), 0 0 16px rgba(255, 88, 176, 0.45);
+}
+
+.voice-particle-three {
+  background: #8a7cff;
+}
+
+.microphone-control {
+  width: 128px;
+  height: 128px;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.28), transparent 24%),
+    linear-gradient(145deg, #ff4d9d, #7b50ff 54%, #2ddfff);
+  box-shadow:
+    0 0 0 10px rgba(111, 93, 255, 0.08),
+    0 0 56px rgba(105, 87, 255, 0.42),
+    0 0 90px rgba(255, 65, 157, 0.16),
+    0 22px 46px rgba(0, 7, 30, 0.38),
+    inset 0 1px rgba(255, 255, 255, 0.36);
+}
+
+.voice-stage-listening .microphone-control {
+  box-shadow: 0 0 0 13px rgba(42, 223, 255, 0.1), 0 0 64px rgba(42, 221, 255, 0.46), 0 0 100px rgba(50, 112, 255, 0.2);
+}
+
+.voice-stage-speaking .microphone-control {
+  box-shadow: 0 0 0 13px rgba(255, 79, 172, 0.1), 0 0 64px rgba(255, 65, 163, 0.43), 0 0 100px rgba(126, 74, 255, 0.22);
+}
+
+.microphone-ring {
+  border-color: rgba(89, 224, 255, 0.24);
+}
+
+.microphone-ring-three {
+  border-color: rgba(255, 93, 183, 0.18);
+}
+
+.voice-waveform i {
+  background: linear-gradient(to bottom, #ff6eb9, #64e8ff);
+}
+
+.voice-stage-copy strong {
+  color: #fff;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+}
+
+.voice-stage-copy span {
+  color: #aebed9;
+}
+
+.voice-context-line {
+  border-color: rgba(125, 213, 255, 0.16);
+  color: #c5d9f4;
+  background: rgba(15, 31, 68, 0.62);
+}
+
+.voice-intelligence-feed {
+  width: min(100%, 520px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.voice-intelligence-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid rgba(150, 178, 225, 0.1);
+  border-radius: 8px;
+  color: #8292ae;
+  background: rgba(8, 20, 49, 0.5);
+  font-size: 0.58rem;
+}
+
+.voice-intelligence-item i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #687a9c;
+}
+
+.voice-intelligence-item.intelligence-active {
+  color: #d4e4ff;
+}
+
+.voice-intelligence-item.intelligence-active i {
+  background: #a677ff;
+  box-shadow: 0 0 12px rgba(157, 103, 255, 0.7);
+  animation: intelligence-dot-pulse 1.8s ease-in-out infinite;
+}
+
+.voice-intelligence-item.intelligence-verified {
+  border-color: rgba(67, 224, 255, 0.17);
+  color: #a8efff;
+}
+
+.voice-intelligence-item.intelligence-verified i { background: #40ddff; }
+.voice-intelligence-item.intelligence-alert { color: #ffc0a7; }
+.voice-intelligence-item.intelligence-alert i { background: #ff8d67; }
+.voice-intelligence-item.intelligence-missing { color: #f4b7d9; }
+.voice-intelligence-item.intelligence-missing i { background: #ff65b3; }
+
+.interaction-workspace .conversation-panel {
+  padding: 34px 28px;
+  color: #e9f1ff;
+  background: #0a1730;
+}
+
+.conversation-panel .eyebrow {
+  color: #7ddfff;
+}
+
+.conversation-panel .section-heading-row h2 {
+  color: #f6f9ff;
+}
+
+.conversation-panel .compact-heading-row {
+  border-bottom-color: rgba(171, 197, 234, 0.12);
+}
+
+.conversation-count {
+  border-color: rgba(142, 178, 225, 0.15);
+  color: #aabbd5;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.conversation-panel .transcript-empty-state {
+  border-color: rgba(139, 184, 235, 0.18);
+  color: #92a7c8;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.conversation-panel .transcript-assistant {
+  border-left-color: #7f62ff;
+  background: rgba(112, 83, 255, 0.13);
+}
+
+.conversation-panel .transcript-traveler {
+  color: #d8e5f8;
+}
+
+.conversation-panel .transcript-message p,
+.conversation-panel .transcript-meta,
+.conversation-panel .transcript-meta span {
+  color: #c2cfe3;
+}
+
+.voice-panel .text-fallback {
+  margin-top: 16px;
+  border-color: rgba(145, 174, 219, 0.16);
+  background: rgba(5, 16, 40, 0.64);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.voice-panel .text-fallback-label {
+  color: #d6e2f4;
+}
+
+.voice-panel .text-fallback textarea {
+  border-color: rgba(136, 176, 232, 0.2);
+  color: #edf5ff;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.voice-panel .text-fallback textarea::placeholder,
+.voice-panel .text-fallback-note {
+  color: #8596b2;
+}
+
+.disconnect-btn {
+  background: #d83b85;
+}
+
+/* Destination cards with city energy */
+.interaction-workspace + .trip-selector-panel {
+  margin-top: 32px;
+  padding-top: 26px;
+  border-top-color: #dce3ed;
+}
+
+.trip-selector-panel .eyebrow {
+  color: #5468df;
+}
+
+.trip-selector-card {
+  min-height: 350px;
+  border: 0;
+  border-radius: 22px 6px 22px 6px;
+  color: #eaf7ff;
+  background:
+    radial-gradient(circle at 83% 18%, rgba(51, 219, 255, 0.22), transparent 24%),
+    linear-gradient(145deg, #081d36, #0b3751 58%, #07506a);
+  box-shadow: 0 15px 38px rgba(5, 39, 67, 0.18);
+}
+
+.trip-card-austin {
+  color: #fff6f1;
+  background:
+    radial-gradient(circle at 82% 14%, rgba(255, 193, 92, 0.26), transparent 25%),
+    linear-gradient(145deg, #35142d, #7b2d49 58%, #bb583d);
+  box-shadow: 0 15px 38px rgba(84, 31, 50, 0.18);
+}
+
+.trip-selector-card .card-header,
+.trip-card-chicago .card-header {
+  border-bottom-color: rgba(225, 242, 255, 0.12);
+  color: #e7f7ff;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.trip-selector-card .trip-discovery-label {
+  color: rgba(236, 248, 255, 0.78);
+}
+
+.trip-selector-card .source-tag,
+.trip-card-chicago .source-tag-verified {
+  border-color: rgba(221, 243, 255, 0.2);
+  color: #e8f7ff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.trip-ticket-route,
+.trip-selector-card h3,
+.trip-selector-card .trip-airline,
+.trip-selector-card .trip-card-facts,
+.trip-selector-card .trip-card-facts strong {
+  color: #f6fbff;
+}
+
+.trip-card-austin .trip-ticket-route,
+.trip-card-austin h3,
+.trip-card-austin .trip-airline,
+.trip-card-austin .trip-card-facts,
+.trip-card-austin .trip-card-facts strong {
+  color: #fff8f2;
+}
+
+.trip-ticket-route-line > svg:first-child {
+  stroke: rgba(199, 239, 255, 0.45);
+}
+
+.trip-card-austin .trip-ticket-route-line > svg:first-child {
+  stroke: rgba(255, 224, 187, 0.48);
+}
+
+.trip-ticket-route-line > svg:last-child {
+  color: #0c3550;
+  background: #72e6ff;
+  box-shadow: 0 0 16px rgba(82, 224, 255, 0.34);
+}
+
+.trip-card-austin .trip-ticket-route-line > svg:last-child {
+  color: #6c2942;
+  background: #ffc06f;
+  box-shadow: 0 0 16px rgba(255, 172, 89, 0.35);
+}
+
+.trip-selector-card .status-badge {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffd0bd;
+  background: rgba(255, 100, 76, 0.13);
+}
+
+.trip-card-austin .status-badge {
+  color: #ffe8b5;
+  background: rgba(255, 195, 81, 0.12);
+}
+
+.trip-selector-card::after,
+.trip-selector-context {
+  border-color: rgba(221, 240, 255, 0.12);
+  background-color: transparent;
+}
+
+.trip-selector-context {
+  color: rgba(232, 244, 255, 0.76);
+}
+
+.trip-selector-context svg {
+  color: #ffb28f;
+}
+
+.trip-city-art {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: 88px;
+  opacity: 0.13;
+  pointer-events: none;
+}
+
+.trip-city-art svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: #b9eeff;
+  stroke-width: 1.2;
+}
+
+.trip-card-austin .trip-city-art svg {
+  stroke: #ffe2b7;
+}
+
+.trip-city-art span {
+  position: absolute;
+  right: 18px;
+  bottom: 8px;
+  color: #d6f5ff;
+  font-size: 0.51rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.trip-card-austin .trip-city-art span {
+  color: #ffe7c5;
+}
+
+.trip-selector-card .card-header,
+.trip-selector-card .trip-ticket-route,
+.trip-selector-card .card-body {
+  position: relative;
+  z-index: 1;
+}
+
+.trip-ticket-notch {
+  border: 0;
+  background: #f4f7fb;
+}
+
+.trip-selector-card.selected {
+  border: 0;
+  background:
+    radial-gradient(circle at 83% 18%, rgba(62, 229, 255, 0.32), transparent 27%),
+    linear-gradient(145deg, #082846, #0b4965 58%, #08738a);
+  box-shadow: 0 0 0 3px #48ddff, 0 0 34px rgba(54, 211, 255, 0.3), 0 18px 44px rgba(4, 49, 78, 0.24);
+  transform: translateY(-3px);
+}
+
+.trip-card-austin.selected {
+  background:
+    radial-gradient(circle at 82% 14%, rgba(255, 199, 91, 0.36), transparent 28%),
+    linear-gradient(145deg, #4a1738, #983b51 58%, #db6c45);
+  box-shadow: 0 0 0 3px #ff9e72, 0 0 34px rgba(255, 104, 124, 0.28), 0 18px 44px rgba(91, 28, 50, 0.24);
+}
+
+/* Dynamic intelligence discoveries */
+.recommendation-section {
+  position: relative;
+}
+
+.intelligence-section-heading .eyebrow {
+  color: #6556e8;
+}
+
+.intelligence-section-heading::after {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #397cff, #3ee6ea 34%, #7c5cff 68%, #ff6fba);
+  opacity: 0.9;
+}
+
+.recommendation-grid {
+  gap: 14px;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.recommendation-card {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--intelligence-accent) 22%, #dce3ee);
+  border-radius: 18px 5px 18px 5px;
+  background:
+    radial-gradient(circle at 92% -8%, color-mix(in srgb, var(--intelligence-accent) 16%, transparent), transparent 34%),
+    color-mix(in srgb, var(--intelligence-surface) 52%, #fff);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--intelligence-accent) 10%, transparent);
+  animation: intelligence-card-reveal 520ms cubic-bezier(0.2, 0.72, 0.28, 1) both;
+}
+
+.recommendation-card:nth-child(2) { animation-delay: 90ms; }
+.recommendation-card:nth-child(3) { animation-delay: 180ms; }
+.recommendation-card:nth-child(4) { animation-delay: 270ms; }
+.recommendation-card:nth-child(5) { animation-delay: 360ms; }
+.recommendation-card:nth-child(6) { animation-delay: 450ms; }
+
+.recommendation-card::before {
+  height: 4px;
+  background: linear-gradient(90deg, var(--intelligence-accent), color-mix(in srgb, var(--intelligence-accent) 35%, #5ce7ff));
+}
+
+.how-travelwell-knows {
+  border: 0;
+  background: #dfe5f0;
+}
+
+.how-travelwell-knows > div:first-child {
+  background: linear-gradient(135deg, #25346d, #6548b6);
+}
+
+.approval-section {
+  border-color: #ead492 !important;
+  background:
+    radial-gradient(circle at 100% 0, rgba(255, 205, 78, 0.16), transparent 30%),
+    #fffaf0 !important;
+}
+
+.approval-heading-icon {
+  color: #77520a;
+  background: linear-gradient(135deg, #ffe7a4, #ffc95c);
+}
+
+.journey-flight-strip {
+  background:
+    radial-gradient(circle at 86% 4%, rgba(64, 217, 255, 0.23), transparent 27%),
+    linear-gradient(135deg, #071d3b, #0b4767);
+}
+
+.itinerary-item .itinerary-copy {
+  border-radius: 12px 4px 12px 4px;
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--category-color) 8%, transparent);
+}
+
+@keyframes hero-route-draw {
+  from { stroke-dashoffset: 170; opacity: 0; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes destination-node-pulse {
+  0%, 100% { r: 4px; opacity: 0.62; }
+  50% { r: 6px; opacity: 1; }
+}
+
+@keyframes memory-signal-pulse {
+  0% { transform: scale(0.85); opacity: 0; }
+  35% { opacity: 0.72; }
+  100% { transform: scale(1.16); opacity: 0; }
+}
+
+@keyframes intelligence-dot-pulse {
+  0%, 100% { transform: scale(0.75); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes intelligence-card-reveal {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (max-width: 1120px) {
+  .intelligence-intro { grid-template-columns: 1fr; }
+  .product-principles { justify-self: start; }
+  .interaction-workspace { grid-template-columns: 1fr; }
+  .interaction-workspace .voice-panel { box-shadow: inset 0 -1px rgba(169, 200, 239, 0.14); }
+}
+
+@media (max-width: 820px) {
+  .intelligence-intro { min-height: 380px; border-radius: 0 0 36px 0; }
+  .intelligence-intro h1 { font-size: clamp(2.8rem, 11vw, 5rem); }
+  .product-principles { flex-direction: row; border-left: 0; padding-left: 0; }
+  .voice-intelligence-feed { grid-template-columns: 1fr; }
+  .recommendation-grid { gap: 10px; }
+}
+
+@media (max-width: 580px) {
+  .app-container { padding-right: 14px; padding-left: 14px; }
+  .intelligence-intro { margin-right: -14px; margin-left: -14px; padding: 42px 22px 36px; }
+  .intelligence-intro h1 { font-size: 3.1rem; }
+  .hero-live-context { align-items: flex-start; flex-direction: column; }
+  .hero-live-context i { display: none; }
+  .product-principles { align-items: flex-start; flex-direction: column; }
+  .traveler-profile-card { padding: 16px; }
+  .profile-memory-compact-summary span { width: fit-content; }
+  .interaction-workspace { border-radius: 22px 4px 22px 4px; }
+  .interaction-workspace .voice-panel,
+  .interaction-workspace .conversation-panel { padding: 24px 18px; }
+  .voice-stage { min-height: 430px; }
+  .microphone-control { width: 112px; height: 112px; }
+  .trip-selector-card { min-height: 370px; }
+}
+
+/* Stable interactive states: keep memory and destination cards in their visual families. */
+.traveler-profile-card,
+.traveler-profile-card.profile-memory-expanded {
+  border-color: rgba(66, 225, 168, 0.24);
+  color: #f1fff9;
+  background:
+    radial-gradient(circle at 82% -40%, rgba(58, 235, 169, 0.22), transparent 36%),
+    linear-gradient(105deg, #071d28, #0b2d35 52%, #0e3a3a);
+}
+
+.traveler-profile-card.profile-memory-expanded {
+  border-color: rgba(91, 237, 185, 0.34);
+  background:
+    radial-gradient(circle at 82% -32%, rgba(72, 241, 181, 0.24), transparent 39%),
+    linear-gradient(112deg, #08232d, #0b353a 55%, #105047);
+  box-shadow: 0 18px 42px rgba(5, 42, 44, 0.19), inset 0 1px rgba(205, 255, 237, 0.08);
+}
+
+.traveler-profile-card.profile-memory-expanded .profile-summary-items {
+  gap: 9px;
+  padding: 14px;
+  border: 1px solid rgba(139, 239, 204, 0.13);
+  border-radius: 14px 4px 14px 4px;
+  background: rgba(2, 24, 29, 0.34);
+  box-shadow: inset 0 1px rgba(225, 255, 244, 0.035);
+}
+
+.traveler-profile-card.profile-memory-expanded .profile-summary-items span {
+  padding: 7px 8px;
+  border: 1px solid rgba(142, 228, 198, 0.09);
+  border-radius: 8px 3px 8px 3px;
+  color: #cce5dc;
+  background: rgba(123, 224, 188, 0.055);
+}
+
+.traveler-profile-card.profile-memory-expanded .profile-summary-items strong {
+  color: #f2fff9;
+}
+
+.traveler-profile-card.profile-memory-expanded .profile-account-confirmation {
+  color: #baffdf !important;
+  background: rgba(62, 218, 161, 0.1);
+}
+
+.trip-selector-card {
+  border: 1px solid rgba(135, 211, 235, 0.18);
+  background:
+    radial-gradient(circle at 83% 18%, rgba(51, 219, 255, 0.2), transparent 25%),
+    linear-gradient(135deg, #071b33, #0b3152 57%, #0b5964);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.trip-card-austin {
+  border-color: rgba(255, 177, 141, 0.18);
+  background:
+    radial-gradient(circle at 82% 14%, rgba(255, 193, 92, 0.21), transparent 27%),
+    linear-gradient(145deg, #35142d, #702943 58%, #a34c3a);
+}
+
+.trip-selector-card.is-unselected {
+  filter: saturate(0.88) brightness(0.94);
+  box-shadow: 0 12px 30px rgba(5, 39, 67, 0.14);
+}
+
+.trip-selector-card.is-unselected:hover,
+.trip-selector-card.is-unselected:focus-visible {
+  border-color: rgba(92, 225, 255, 0.72);
+  background:
+    radial-gradient(circle at 83% 18%, rgba(51, 219, 255, 0.25), transparent 26%),
+    linear-gradient(135deg, #071b33, #0b385b 57%, #0b6470);
+  box-shadow: 0 0 0 2px rgba(68, 213, 255, 0.18), 0 15px 36px rgba(7, 62, 93, 0.22);
+  filter: saturate(1) brightness(1.04);
+  transform: translateY(-2px);
+}
+
+.trip-card-austin.is-unselected:hover,
+.trip-card-austin.is-unselected:focus-visible {
+  border-color: rgba(255, 159, 119, 0.72);
+  background:
+    radial-gradient(circle at 82% 14%, rgba(255, 193, 92, 0.27), transparent 28%),
+    linear-gradient(145deg, #421632, #813049 58%, #b6563f);
+  box-shadow: 0 0 0 2px rgba(255, 132, 108, 0.16), 0 15px 36px rgba(91, 28, 50, 0.22);
+}
+
+.trip-selector-card.is-selected,
+.trip-selector-card.selected.is-selected {
+  border: 1px solid #54ddff;
+  background:
+    radial-gradient(circle at 83% 18%, rgba(62, 229, 255, 0.34), transparent 29%),
+    linear-gradient(135deg, #071b33, #0b3f61 57%, #087587);
+  box-shadow: 0 0 0 3px rgba(72, 221, 255, 0.28), 0 0 36px rgba(54, 211, 255, 0.3), 0 20px 46px rgba(4, 49, 78, 0.27);
+  filter: saturate(1.08) brightness(1.04);
+  transform: translateY(-3px);
+}
+
+.trip-card-austin.is-selected,
+.trip-card-austin.selected.is-selected {
+  border-color: #ff9e72;
+  background:
+    radial-gradient(circle at 82% 14%, rgba(255, 199, 91, 0.36), transparent 29%),
+    linear-gradient(145deg, #4a1738, #983b51 58%, #db6c45);
+  box-shadow: 0 0 0 3px rgba(255, 142, 105, 0.26), 0 0 34px rgba(255, 104, 124, 0.28), 0 20px 46px rgba(91, 28, 50, 0.27);
+}
+
+.trip-selector-card.is-selected .trip-ticket-route-line > svg:first-child {
+  stroke: rgba(143, 238, 255, 0.9);
+  stroke-width: 1.8;
+  animation: hero-route-draw 900ms ease-out both;
+}
+
+.trip-card-austin.is-selected .trip-ticket-route-line > svg:first-child {
+  stroke: rgba(255, 218, 174, 0.9);
+}
+
+.trip-card-state {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.trip-selected-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px;
+  border: 1px solid rgba(164, 242, 255, 0.32);
+  border-radius: 999px;
+  color: #eaffff;
+  background: rgba(60, 218, 247, 0.18);
+  font-size: 0.57rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.trip-selected-indicator svg {
+  width: 11px;
+  height: 11px;
+}
+
+.trip-card-austin .trip-selected-indicator {
+  border-color: rgba(255, 229, 197, 0.3);
+  color: #fff9f1;
+  background: rgba(255, 174, 105, 0.16);
+}
+
+.trip-selector-card:focus-visible {
+  outline: 3px solid #b6f3ff;
+  outline-offset: 4px;
+}
+
+.trip-card-austin:focus-visible {
+  outline-color: #ffd0b6;
+}
+
+.trip-selector-card:disabled,
+.trip-selector-card.is-disabled {
+  border-color: rgba(150, 177, 187, 0.18);
+  cursor: not-allowed;
+  filter: saturate(0.45) brightness(0.78);
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.trip-selector-card:disabled *,
+.trip-selector-card.is-disabled * {
+  opacity: 1;
 }

@@ -23,7 +23,6 @@ from google.genai import types
 
 from app.agent import root_agent
 
-
 import time
 import pytest
 
@@ -41,7 +40,7 @@ def test_agent_stream() -> None:
 
     message = types.Content(
         role="user", 
-        parts=[types.Part.from_text(text="I am at Downtown Chicago. I need to find a gym with showers and a pool between 6:00 PM and 9:00 PM. I have a YMCA membership, and my budget is $20.")]
+        parts=[types.Part.from_text(text="Help me with my upcoming trips.")]
     )
 
     max_retries = 3
@@ -87,10 +86,7 @@ def test_agent_stream() -> None:
 
     assert len(full_output) > 0, "Expected non-empty text content from the stream response"
     
-    # Verify Downtown Chicago YMCA appears for the baseline mock scenario
-    assert "YMCA" in full_output, "Expected Downtown Chicago YMCA in the agent recommendation output"
-    
-    # Verify constraint validation language is present
-    assert "Constraint" in full_output or "Why this recommendation?" in full_output or "Eligibility" in full_output, (
-        "Expected validation policy or constraint checks in the output"
+    # Verify that the agent offers trip options (e.g. Chicago, Seattle) as defined in tools/fixtures
+    assert "Chicago" in full_output or "Seattle" in full_output or "upcoming" in full_output.lower(), (
+        "Expected proactive trip greeting in agent output"
     )

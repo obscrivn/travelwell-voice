@@ -56,7 +56,7 @@ export function ProactiveRecommendations({ recommendations }: ProactiveRecommend
           const Icon = categoryIcon[recommendation.category];
           const isPreviewed = previewedId === recommendation.id;
           return (
-            <article key={recommendation.id} className="recommendation-card">
+            <article key={recommendation.id} className={`recommendation-card recommendation-category-${recommendation.category}`}>
               <div className="recommendation-card-topline">
                 <span className="recommendation-icon"><Icon aria-hidden="true" /></span>
                 <StatusBadge status={recommendation.status} subtle />

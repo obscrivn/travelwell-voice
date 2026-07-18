@@ -113,3 +113,66 @@ class ConciergeResponse(BaseModel):
     itinerary: List[ItineraryItem]
     metadata: Metadata
     trace: List[TraceEvent]
+
+
+from typing import Literal, Dict
+
+class TravelerProfile(BaseModel):
+    id: str
+    travel_style: Literal["business", "leisure", "both"]
+    airline_loyalty: List[str]
+    hotel_loyalty: List[str]
+    lounge_memberships: List[str]
+    dietary_preferences: List[str]
+    wellness_habits: List[str]
+    preferred_retailers: List[str]
+    walking_tolerance_minutes: Optional[int] = None
+    rental_car_preferences: List[str]
+    ground_transport_preferences: List[str]
+
+class TripSummary(BaseModel):
+    id: str
+    destination: str
+    start_date: str
+    end_date: str
+    primary_carrier: Optional[str] = None
+    source: Literal["sabre", "fixture", "traveler"]
+
+class TripContext(BaseModel):
+    trip_id: str
+    flight: Optional[dict] = None
+    hotel: Optional[dict] = None
+    rental_car: Optional[dict] = None
+    ground_transport: Optional[dict] = None
+    dining: Optional[dict] = None
+    activities: List[dict] = Field(default_factory=list)
+    missing_fields: List[str] = Field(default_factory=list)
+
+class ProposedAction(BaseModel):
+    id: str
+    action_type: str
+    label: str
+    requires_approval: bool = True
+    integration_status: Literal["available", "preview", "not_connected"]
+
+class TravelRecommendation(BaseModel):
+    id: str
+    category: str
+    title: str
+    description: str
+    why_now: str
+    match_reason: str
+    source: str
+    confidence: Literal["verified", "provided", "inferred", "suggested"]
+    urgency: Literal["normal", "time_sensitive"]
+    proposed_action: Optional[ProposedAction] = None
+
+class TravelIntelligenceResponse(BaseModel):
+    selected_trip: TripSummary
+    context: TripContext
+    follow_up_question: Optional[str] = None
+    recommendations: List[TravelRecommendation] = Field(default_factory=list)
+    proposed_itinerary: List[dict] = Field(default_factory=list)
+    proposed_actions: List[ProposedAction] = Field(default_factory=list)
+    spoken_summary: str
+

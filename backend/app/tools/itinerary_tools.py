@@ -1,18 +1,4 @@
-# Copyright 2026 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-from typing import Dict, Any
+from typing import Dict, Any, List
 from app.services.mock_data import load_mock_data
 
 def calculate_route_distances(facility_id: str) -> Dict[str, Any]:
@@ -29,7 +15,7 @@ def calculate_route_distances(facility_id: str) -> Dict[str, Any]:
     if key and not facility_id.startswith("mock_"):
         details = get_place_details_live(facility_id) or {}
         dest_coords = details.get("geometry", {}).get("location", {}) if details.get("geometry") else {}
-        dest_lat = dest_coords.get("lat") or 41.8962 # River North area default
+        dest_lat = dest_coords.get("lat") or 41.8962 
         dest_lng = dest_coords.get("lng") or -87.6287
         
         dest_str = f"{dest_lat},{dest_lng}"
@@ -72,3 +58,107 @@ def calculate_route_distances(facility_id: str) -> Dict[str, Any]:
                     "travel_metadata": fac.get("travel_metadata")
                 }
     return {"status": "error", "message": f"Facility {facility_id} not found."}
+
+
+def build_trip_context(trip_id: str, updates: dict) -> Dict[str, Any]:
+    """Combines existing Sabre context with user voice updates.
+
+    Args:
+        trip_id: The ID of the selected trip.
+        updates: Specific updates provided by the user.
+
+    Returns:
+        The updated trip context dictionary.
+    """
+    from app.tools.sabre_tools import get_trip_context
+    context = get_trip_context(trip_id)
+    for key in ["hotel", "rental_car", "ground_transport", "dining"]:
+        if key in updates and updates[key]:
+            context[key] = updates[key]
+    
+    # Recalculate missing fields
+    missing = []
+    if not context.get("hotel"):
+        missing.append("hotel")
+    if not context.get("rental_car"):
+        missing.append("rental_car")
+    context["missing_fields"] = missing
+    
+    return context
+
+def identify_missing_context(context: dict) -> List[str]:
+    """Identifies fields that have not been provided or resolved.
+
+    Args:
+        context: The current trip context dictionary.
+
+    Returns:
+        List of missing fields.
+    """
+    return context.get("missing_fields", [])
+
+def update_itinerary_preview(trip_id: str, approved_actions: list) -> List[dict]:
+    """Generates an updated chronological itinerary preview based on approved actions.
+
+    Args:
+        trip_id: Unique identifier for the trip.
+        approved_actions: List of actions approved by the traveler.
+
+    Returns:
+        List of itinerary item dictionaries.
+    """
+    # Baseline itinerary
+    itinerary = [
+        {
+            "id": "flight",
+            "category": "flight",
+            "time": "6:40 PM",
+            "title": "Arrive in Chicago",
+            "detail": "IND → ORD · estimated arrival",
+            "status": "Delayed",
+            "kind": "trip data"
+        },
+        {
+            "id": "ground",
+            "category": "ground",
+            "time": "7:20 PM",
+            "title": "Ground transport downtown",
+            "detail": "Uber Black selection based on ground preferences",
+            "status": "Suggested",
+            "kind": "suggestion"
+        },
+        {
+            "id": "hotel",
+            "category": "hotel",
+            "time": "8:05 PM",
+            "title": "Marriott Downtown Check-in",
+            "detail": "Loyalty tier recognized: Titanium Elite",
+            "status": "Confirmed",
+            "kind": "trip data"
+        }
+    ]
+
+    for act in approved_actions:
+        if act == "add_dinner":
+            itinerary.append({
+                "id": "dining",
+                "category": "dining",
+                "time": "8:30 PM",
+                "title": "Healthy dinner nearby",
+                "detail": "True Food Kitchen suggested (organic, high protein)",
+                "status": "Confirmed",
+                "kind": "suggestion"
+            })
+        elif act == "add_workout":
+            itinerary.append({
+                "id": "wellness",
+                "category": "wellness",
+                "time": "9:20 PM",
+                "title": "Short indoor workout",
+                "detail": "Marriott Fitness Center (indoor pool, open 24/7)",
+                "status": "Confirmed",
+                "kind": "suggestion"
+            })
+            
+    # Sort itinerary by time (simple hour comparison)
+    return itinerary

@@ -1,4 +1,4 @@
-import { Check, Link2, Pencil, ShieldCheck, UserRound } from 'lucide-react';
+import { Check, ChevronDown, CircleCheck, Link2, Pencil, ShieldCheck, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import type { TravelerProfile } from '../types/travel';
 
@@ -18,27 +18,62 @@ const toggleValue = (values: string[], value: string) =>
 export function TravelerProfileSetup({ profile, isComplete, onSave, onEdit }: TravelerProfileSetupProps) {
   const [draft, setDraft] = useState(profile);
   const [connectionPreview, setConnectionPreview] = useState<string | null>(null);
+  const [isMemoryExpanded, setIsMemoryExpanded] = useState(false);
 
   if (isComplete) {
     return (
-      <section className="traveler-profile-card" aria-labelledby="traveler-profile-title">
-        <div className="profile-card-lead">
-          <span className="profile-avatar"><UserRound aria-hidden="true" /></span>
-          <div>
-            <div className="eyebrow">Traveler Memory</div>
-            <h2 id="traveler-profile-title">Your preferences can travel with you</h2>
-            <p>{profile.travelerType} travel · {profile.walkingTolerance.toLowerCase()}</p>
+      <section className={`traveler-profile-card ${isMemoryExpanded ? 'profile-memory-expanded' : ''}`} aria-labelledby="traveler-profile-title">
+        <div className="profile-memory-header">
+          <button
+            type="button"
+            className="profile-memory-toggle"
+            onClick={() => setIsMemoryExpanded((expanded) => !expanded)}
+            aria-expanded={isMemoryExpanded}
+            aria-controls="traveler-memory-details"
+          >
+            <span className="profile-avatar">
+              <span className="memory-signal memory-signal-one" aria-hidden="true" />
+              <span className="memory-signal memory-signal-two" aria-hidden="true" />
+              <UserRound aria-hidden="true" />
+            </span>
+            <span className="profile-card-lead">
+              <span>
+                <span className="eyebrow">Persistent across trips</span>
+                <span id="traveler-profile-title" className="profile-memory-title">Jim’s Travel Memory</span>
+                <span className="profile-memory-assurance">TravelWell already knows this traveler</span>
+              </span>
+              <ChevronDown className="profile-memory-chevron" aria-hidden="true" />
+            </span>
+          </button>
+          <div className="profile-memory-actions">
+            <span className="profile-connected-indicator"><CircleCheck aria-hidden="true" /> Connected</span>
+            <button type="button" className="profile-edit-button" onClick={onEdit}>
+              <Pencil aria-hidden="true" /> Edit
+            </button>
           </div>
         </div>
-        <div className="profile-summary-items">
-          <span><strong>Loyalty</strong>{profile.airlineLoyalty} · {profile.hotelLoyalty}</span>
-          <span><strong>Food</strong>{profile.dietaryPreferences.join(', ')}</span>
-          <span><strong>Wellness</strong>{profile.wellnessHabits.join(', ')}</span>
-          <span><strong>Retail</strong>{profile.preferredRetailers}</span>
+
+        <div className="profile-memory-compact-summary" aria-label="Jim's saved travel preferences">
+          <span className="profile-travel-style">{profile.travelerType} traveler · balanced pace</span>
+          <span>American Airlines · AAdvantage</span>
+          <span>Marriott Bonvoy</span>
+          <span>High-protein · vegetable-forward</span>
+          <span>Short workouts · hotel pool</span>
+          <span>Whole Foods Market</span>
         </div>
-        <button type="button" className="profile-edit-button" onClick={onEdit}>
-          <Pencil aria-hidden="true" /> Edit
-        </button>
+
+        {isMemoryExpanded && (
+          <div id="traveler-memory-details" className="profile-summary-items">
+            <span><strong>Travel style</strong>{profile.travelerType} · {profile.walkingTolerance}</span>
+            <span><strong>Loyalty</strong>{profile.airlineLoyalty} · {profile.hotelLoyalty}</span>
+            <span><strong>Memberships</strong>{profile.loungeMemberships}</span>
+            <span><strong>Food</strong>{profile.dietaryPreferences.join(', ')}</span>
+            <span><strong>Wellness</strong>{profile.wellnessHabits.join(', ')}</span>
+            <span><strong>Retail</strong>{profile.preferredRetailers}</span>
+            <span className="profile-account-confirmation"><CircleCheck aria-hidden="true" /><strong>American Airlines account</strong>Connected</span>
+            <span className="profile-account-confirmation"><CircleCheck aria-hidden="true" /><strong>AAdvantage membership</strong>Connected</span>
+          </div>
+        )}
       </section>
     );
   }
@@ -48,9 +83,9 @@ export function TravelerProfileSetup({ profile, isComplete, onSave, onEdit }: Tr
       <div className="setup-intro">
         <div className="setup-step-number">01</div>
         <div>
-          <div className="eyebrow">Traveler Memory setup · local preview</div>
+          <div className="eyebrow">Traveler Memory</div>
           <h2 id="traveler-setup-title">Let’s build your Traveler Memory.</h2>
-          <p>These preferences are designed to persist across trips so TravelWell can learn through conversation. This demo remains local and nothing is connected or shared.</p>
+          <p>These preferences persist across trips so TravelWell can learn through conversation. Connected account data remains clearly identified.</p>
         </div>
       </div>
 
@@ -127,11 +162,13 @@ export function TravelerProfileSetup({ profile, isComplete, onSave, onEdit }: Tr
 
         <div className="account-connections">
           <div className="account-connections-heading">
-            <div><Link2 aria-hidden="true" /><span><strong>Optional account connections</strong><small>Preview placeholders only</small></span></div>
-            <span>Not connected</span>
+            <div><Link2 aria-hidden="true" /><span><strong>Travel account connections</strong><small>American Airlines traveler context</small></span></div>
+            <span className="account-connected-label">Connected</span>
           </div>
           <div className="connection-options">
-            {['American Airlines', 'Marriott Bonvoy', 'Calendar'].map((account) => (
+            <span className="connection-option-connected"><CircleCheck aria-hidden="true" />American Airlines<small>Connected</small></span>
+            <span className="connection-option-connected"><CircleCheck aria-hidden="true" />AAdvantage<small>Connected</small></span>
+            {['Marriott Bonvoy', 'Calendar'].map((account) => (
               <button type="button" key={account} onClick={() => setConnectionPreview(account)}>
                 Connect {account}<span>Preview</span>
               </button>

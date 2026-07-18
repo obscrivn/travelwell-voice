@@ -38,7 +38,10 @@ import {
 const ENABLE_LEGACY_WELLNESS_UI = false;
 
 const RETURNING_TRAVELER_GREETING =
-  'Welcome back, Jim. I found two upcoming trips: Chicago this weekend and Austin next month. Which one are we working on?';
+  'Welcome back, Jim. I found your upcoming American Airlines trips to Chicago and Austin. Which one are we working on today?';
+
+const CHICAGO_SELECTION_RESPONSE =
+  'Got it. Your American Airlines flight AA100 is currently delayed. I’ll factor that into the trip. I don’t have your hotel or rental-car details yet. Where are you staying?';
 
 type TripSelectionSource = 'voice' | 'card';
 
@@ -60,6 +63,14 @@ function buildTripContext(tripId: string): TripContext {
         flight_number: 'AA100',
         origin: 'Indianapolis',
         destination: 'Chicago',
+        origin_code: 'IND',
+        destination_code: 'ORD',
+        departure_time: '4:58 PM',
+        scheduled_arrival: '5:58 PM',
+        estimated_arrival: '6:40 PM',
+        delay_minutes: 42,
+        terminal: 'Terminal 3',
+        gate: 'H15',
         eta: '6:40 PM',
         status: 'Delayed',
       },
@@ -684,22 +695,24 @@ export default function App() {
   const [hasYmca, setHasYmca] = useState(true);
   const [freeTextPreferences, setFreeTextPreferences] = useState("");
   const [voicePreviewState, setVoicePreviewState] = useState<any>('Ready');
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState(true);
   const [savedTravelerProfile, setSavedTravelerProfile] = useState<TravelerProfile>(travelerProfile);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [selectedMemberships, setSelectedMemberships] = useState<string[]>(["YMCA"]);
 
   // Active state parameters matching the intelligence flow
   const [tripContextState, setTripContextState] = useState<TripContext | null>(null);
-  const [proactiveRecs, setProactiveRecs] = useState<any[]>(mockProactiveRecommendations);
-  const [approvalActionsList, setApprovalActionsList] = useState<any[]>(mockApprovalActions);
-  const [itineraryTimelineItems, setItineraryTimelineItems] = useState<any[]>(mockItineraryItems);
+  const [proactiveRecs, setProactiveRecs] = useState<any[]>([]);
+  const [approvalActionsList, setApprovalActionsList] = useState<any[]>([]);
+  const [itineraryTimelineItems, setItineraryTimelineItems] = useState<any[]>([]);
   const [transcriptMessages, setTranscriptMessages] = useState<any[]>([]);
 
   // Vocal Bridge Room session
   const [vbSession, setVbSession] = useState<any>(null);
   const [simStep, setSimStep] = useState(0);
   const greetingShownRef = React.useRef(false);
+  const selectedTripIdRef = React.useRef<string | null>(null);
+  const tripContextRef = React.useRef<TripContext | null>(null);
 
   const appendReturningGreeting = () => {
     if (greetingShownRef.current) return;
@@ -719,24 +732,27 @@ export default function App() {
   const handleTripSelection = (tripId: string, source: TripSelectionSource) => {
     const canonicalTripId = tripId === 'austin' ? 'austin' : 'chicago';
     const trip = upcomingTrips.find(item => item.id === canonicalTripId);
+    const nextContext = buildTripContext(canonicalTripId);
 
+    selectedTripIdRef.current = canonicalTripId;
+    tripContextRef.current = nextContext;
     setSelectedTripId(canonicalTripId);
-    setTripContextState(buildTripContext(canonicalTripId));
-    setProactiveRecs(canonicalTripId === 'chicago' ? mockProactiveRecommendations : []);
-    setItineraryTimelineItems(canonicalTripId === 'chicago' ? mockItineraryItems : []);
-    setApprovalActionsList(canonicalTripId === 'chicago' ? mockApprovalActions : []);
+    setTripContextState(nextContext);
+    setProactiveRecs([]);
+    setItineraryTimelineItems([]);
+    setApprovalActionsList([]);
+    setSimStep(2);
 
     if (source === 'card' && trip) {
-      setSimStep(2);
-      const flightPrompt = canonicalTripId === 'chicago'
-        ? 'I have flight context for Chicago.'
-        : 'Flight details for Austin are still missing.';
+      const selectionResponse = canonicalTripId === 'chicago'
+        ? CHICAGO_SELECTION_RESPONSE
+        : 'Got it. I have your Austin dates, but the flight, hotel, and transportation details are still missing. What would you like to add first?';
       setTranscriptMessages(prev => [
         ...prev,
         {
           id: `msg-${Date.now()}-card-selection`,
           speaker: 'assistant',
-          text: `${flightPrompt} What hotel are you staying at, will you need a rental car or ground transportation, and what are your trip priorities?`,
+          text: selectionResponse,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           marker: 'Trip selected with accessible fallback',
         },
@@ -753,6 +769,57 @@ export default function App() {
         });
       }
     }
+  };
+
+  const applyTravelerContextFromText = (text: string) => {
+    const activeTripId = selectedTripIdRef.current;
+    if (!activeTripId) return { hotelProvided: false, transportProvided: false };
+
+    const normalized = text.toLowerCase();
+    const hotelProvided = normalized.includes('marriott') || normalized.includes('hotel');
+    const declinedRental = normalized.includes('no rental') || normalized.includes("don't need a car");
+    const rentalProvided = normalized.includes('hertz') || normalized.includes('rental car') || declinedRental;
+    const groundProvided = normalized.includes('uber') || normalized.includes('taxi') || normalized.includes('train');
+
+    if (!hotelProvided && !rentalProvided && !groundProvided) {
+      return { hotelProvided: false, transportProvided: false };
+    }
+
+    const baseContext = tripContextRef.current?.trip_id === activeTripId
+      ? tripContextRef.current
+      : buildTripContext(activeTripId);
+    const updatedContext: TripContext = {
+      ...baseContext,
+      hotel: hotelProvided ? { name: 'Marriott Downtown', status: 'Provided' } : baseContext.hotel,
+      rental_car: rentalProvided
+        ? { name: declinedRental ? 'No rental car needed' : 'Hertz Rental', status: 'Provided' }
+        : baseContext.rental_car,
+      ground_transport: groundProvided ? { name: 'Ground transportation requested', status: 'Provided' } : baseContext.ground_transport,
+    };
+
+    updatedContext.missing_fields = [
+      !updatedContext.flight && 'flight',
+      !updatedContext.hotel && 'hotel',
+      !updatedContext.rental_car && 'rental_car',
+      !updatedContext.ground_transport && 'ground_transport',
+      !updatedContext.trip_priorities && 'trip_priorities',
+    ].filter(Boolean) as string[];
+
+    tripContextRef.current = updatedContext;
+    setTripContextState(updatedContext);
+
+    if (activeTripId === 'chicago' && updatedContext.hotel) {
+      setProactiveRecs(mockProactiveRecommendations);
+    }
+    if (activeTripId === 'chicago' && updatedContext.hotel && (updatedContext.rental_car || updatedContext.ground_transport)) {
+      setItineraryTimelineItems(mockItineraryItems);
+      setApprovalActionsList(mockApprovalActions);
+    }
+
+    return {
+      hotelProvided,
+      transportProvided: rentalProvided || groundProvided,
+    };
   };
 
   const toggleMembership = (name: string) => {
@@ -832,6 +899,9 @@ export default function App() {
             console.warn('Could not share the transcript trip selection with the voice agent.', error);
           });
         }
+        if (role === 'user') {
+          applyTravelerContextFromText(text);
+        }
         setTranscriptMessages(prev => [
           ...prev,
           {
@@ -877,10 +947,9 @@ export default function App() {
       setTimeout(() => {
         setVoicePreviewState('Speaking');
         handleTripSelection(identifiedTripId, 'voice');
-        const selectedDestination = identifiedTripId === 'chicago' ? 'Chicago' : 'Austin';
-        const flightContext = identifiedTripId === 'chicago'
-          ? 'I have the available Chicago flight details.'
-          : 'The Austin trip is selected, but flight details are still missing.';
+        const selectionResponse = identifiedTripId === 'chicago'
+          ? CHICAGO_SELECTION_RESPONSE
+          : 'Got it. I have your Austin dates, but flight, hotel, and transportation details are still missing. What would you like to add first?';
         setTranscriptMessages(prev => [
           ...prev,
           {
@@ -892,17 +961,44 @@ export default function App() {
           {
             id: `msg-${Date.now()}-assistant-2`,
             speaker: 'assistant',
-            text: `${flightContext} What hotel are you staying at, will you need a rental car or ground transportation, and what matters most for this trip to ${selectedDestination}?`,
+            text: selectionResponse,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
         setSimStep(2);
         setVoicePreviewState('Listening');
       }, 1200);
-    } else if (simStep === 2 && (input.toLowerCase().includes('marriott') || input.toLowerCase().includes('hertz'))) {
+    } else if (simStep === 2 && (input.toLowerCase().includes('marriott') || input.toLowerCase().includes('hotel') || input.toLowerCase().includes('hertz'))) {
       setVoicePreviewState('Thinking');
       setTimeout(() => {
         setVoicePreviewState('Speaking');
+
+        const contextUpdate = applyTravelerContextFromText(input);
+        const currentTripId = selectedTripIdRef.current === 'austin' ? 'austin' : 'chicago';
+        const followUp = currentTripId === 'chicago'
+          ? contextUpdate.transportProvided
+            ? 'Thanks. I have the Marriott Downtown and your transportation details. I can now prepare travel intelligence for Chicago.'
+            : 'Thanks. I’ve added Marriott Downtown as traveler-provided context. Will you need a rental car, or should I plan ground transportation?'
+          : 'Thanks. I’ve added the hotel as traveler-provided context. I still need the Austin flight and transportation plan.';
+        setTranscriptMessages(prev => [
+          ...prev,
+          {
+            id: `msg-${Date.now()}-user`,
+            speaker: 'traveler',
+            text: input,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          },
+          {
+            id: `msg-${Date.now()}-assistant-hotel`,
+            speaker: 'assistant',
+            text: followUp,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            marker: contextUpdate.transportProvided ? 'Context sufficient' : 'Next missing detail'
+          }
+        ]);
+        setSimStep(contextUpdate.transportProvided ? 4 : 3);
+        setVoicePreviewState('Listening');
+        return;
 
         // Update context details
         const activeTripId = selectedTripId === 'austin' ? 'austin' : 'chicago';
@@ -1035,7 +1131,39 @@ export default function App() {
         setSimStep(3);
         setVoicePreviewState('Listening');
       }, 1200);
-    } else if (simStep === 3 && (input.toLowerCase().includes('add') || input.toLowerCase().includes('workout') || input.toLowerCase().includes('skip'))) {
+    } else if (simStep === 3 && (
+      input.toLowerCase().includes('hertz') ||
+      input.toLowerCase().includes('rental') ||
+      input.toLowerCase().includes('uber') ||
+      input.toLowerCase().includes('taxi') ||
+      input.toLowerCase().includes('train') ||
+      input.toLowerCase().includes('no rental') ||
+      input.toLowerCase().includes("don't need a car")
+    )) {
+      setVoicePreviewState('Thinking');
+      setTimeout(() => {
+        setVoicePreviewState('Speaking');
+        applyTravelerContextFromText(input);
+        setTranscriptMessages(prev => [
+          ...prev,
+          {
+            id: `msg-${Date.now()}-user`,
+            speaker: 'traveler',
+            text: input,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          },
+          {
+            id: `msg-${Date.now()}-assistant-transport`,
+            speaker: 'assistant',
+            text: 'Thanks. I have enough trip context to prepare Travel Intelligence Cards and a proposed itinerary. Every external action will still wait for your approval.',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            marker: 'Travel intelligence active'
+          }
+        ]);
+        setSimStep(4);
+        setVoicePreviewState('Listening');
+      }, 1200);
+    } else if (simStep === 4 && (input.toLowerCase().includes('add') || input.toLowerCase().includes('workout') || input.toLowerCase().includes('skip'))) {
       setVoicePreviewState('Thinking');
       setTimeout(() => {
         setVoicePreviewState('Speaking');
@@ -1104,7 +1232,7 @@ export default function App() {
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
-        setSimStep(4);
+        setSimStep(5);
         setVoicePreviewState('Ready');
       }, 1200);
     }
@@ -1416,18 +1544,39 @@ export default function App() {
             <span>{selectedTrip?.route || 'No trip selected'}</span>
             <strong>{selectedTrip?.dates || 'Choose by voice or card'}</strong>
           </div>
-          <span className="header-delay-indicator trip-active-indicator"><Radio aria-hidden="true" /> {selectedTrip ? 'Trip active' : 'Ready'}</span>
+          <span className="header-delay-indicator trip-active-indicator"><Radio aria-hidden="true" /> {selectedTrip ? 'Trip active' : 'AA connected'}</span>
         </div>
       </header>
 
       <main className="intelligence-home">
         <section className="intelligence-intro" aria-labelledby="intelligence-title">
-          <div>
+          <div className="travel-memory-atmosphere" aria-hidden="true">
+            <span className="airport-code airport-code-ind">IND</span>
+            <span className="airport-code airport-code-ord">ORD</span>
+            <svg viewBox="0 0 520 150" role="presentation">
+              <path d="M12 122 C126 18 312 18 504 102" />
+              <circle cx="14" cy="121" r="4" />
+              <circle cx="504" cy="102" r="4" />
+            </svg>
+            <i className="memory-spark memory-spark-one" />
+            <i className="memory-spark memory-spark-two" />
+          </div>
+          <div className="hero-copy">
             <div className="eyebrow">Proactive personal travel intelligence</div>
             <h1 id="intelligence-title">Travel intelligence that knows what comes next.</h1>
             <p>TravelWell builds understanding from trip data, persistent memory, and conversation—then turns that context into useful recommendations before you have to ask.</p>
+            <div className="hero-live-context" aria-label="Live TravelWell reasoning example">
+              <span><strong>AA100</strong> delayed 42 min</span>
+              <i aria-hidden="true">→</i>
+              <span>arrival shifted</span>
+              <i aria-hidden="true">→</i>
+              <span>dinner window adjusted</span>
+              <i aria-hidden="true">→</i>
+              <span>workout shortened</span>
+            </div>
           </div>
           <div className="product-principles" aria-label="Product capability model">
+            <span className="demo-experience-label">Connected demo experience</span>
             <span><strong>Sabre</strong> trip context</span>
             <span><strong>TravelWell</strong> traveler intelligence</span>
             <span><strong>Vocal Bridge</strong> conversation and actions</span>
@@ -1455,6 +1604,7 @@ export default function App() {
               onTextChange={handleTextChangeAndSim}
               onMicPress={handleMicPress}
               onDisconnect={handleDisconnect}
+              tripDestination={selectedTrip?.destination}
             />
             <ConversationTranscript messages={transcriptMessages} />
           </div>
@@ -1467,7 +1617,7 @@ export default function App() {
 
         <WorkflowSection
           step={3}
-          title="Current trip"
+          title="Current Journey"
           description="See what Sabre confirms, what you supplied, and what TravelWell still needs."
           state={isProfileComplete ? 'available' : 'locked'}
           defaultOpen
@@ -1478,7 +1628,7 @@ export default function App() {
 
         <WorkflowSection
           step={4}
-          title="Travel Intelligence Cards"
+          title="Travel Intelligence"
           description="Discoveries become more confident as Sabre, memory, and conversation add context."
           state={isProfileComplete && selectedTripId && proactiveRecs.length > 0 ? 'available' : 'locked'}
           defaultOpen
@@ -1499,7 +1649,7 @@ export default function App() {
 
         <WorkflowSection
           step={6}
-          title="Actions requiring approval"
+          title="Ready to Act"
           description="Calls, requests, eligibility checks, transport, and itinerary additions wait for you."
           state={isProfileComplete && selectedTripId && approvalActionsList.length > 0 ? 'available' : 'locked'}
           defaultOpen
