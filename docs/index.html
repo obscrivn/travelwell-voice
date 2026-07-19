@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelWell - Cinematic Presentation</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Dark Theme Design Tokens */
+    :root {
+      --font-header: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      
+      --color-bg-base: #050608;
+      --color-bg-card: rgba(12, 17, 26, 0.7);
+      --color-text-main: #F6F8FA;
+      --color-text-muted: #9AA5B1;
+      
+      --color-green: #2D6A4F;
+      --color-gemini: #5AA9FF;
+      --color-teal: #66E3D3;
+      --color-gold: #F4C95D;
+      --color-coral: #FF8A65;
+      --color-glow: #9D7CFF;
+      
+      --transition-main: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-fast: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--color-text-main);
+      background-color: var(--color-bg-base);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* Ambient Lighting Layer */
+    .aurora-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .aurora-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      opacity: 0.25;
+      mix-blend-mode: screen;
+      transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .aurora-1 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--color-glow) 0%, rgba(5,6,8,0) 70%);
+      top: -20%;
+      left: -10%;
+    }
+
+    .aurora-2 {
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, var(--color-gemini) 0%, rgba(5,6,8,0) 70%);
+      bottom: -30%;
+      right: -10%;
+    }
+
+    /* Layout Split: Content (75%) | Route Map (25%) */
+    .presentation-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      position: relative;
+      transition: var(--transition-main);
+    }
+
+    .presentation-layout.layout-full {
+      grid-template-columns: 1fr 0px;
+    }
+
+    /* Left Side Content Container */
+    .deck-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 8%;
+      padding-right: 5%;
+      height: 100%;
+    }
+
+    .slide {
+      position: absolute;
+      width: 90%;
+      opacity: 0;
+      transform: translateY(30px);
+      pointer-events: none;
+      transition: var(--transition-main);
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .slide.prev {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+
+    /* Right Side Persistent Route Map */
+    .map-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding-right: 2rem;
+      border-left: 1px solid rgba(255, 255, 255, 0.04);
+      background: linear-gradient(90deg, rgba(5,6,8,0) 0%, rgba(15, 20, 28, 0.15) 100%);
+      overflow: hidden;
+      transition: var(--transition-main);
+    }
+
+    .presentation-layout.layout-full .map-panel {
+      transform: translateX(340px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .journey-map-container {
+      position: relative;
+      width: 100%;
+      max-width: 280px;
+      height: 440px;
+      background: rgba(10, 15, 24, 0.35);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .map-grid {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      z-index: 1;
+    }
+
+    .map-node {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background-color: #2F3B4E;
+      border-radius: 50%;
+      z-index: 5;
+      transition: var(--transition-main);
+    }
+
+    .map-node.active {
+      background-color: var(--color-teal);
+      box-shadow: 0 0 20px 6px rgba(102, 227, 211, 0.45);
+    }
+
+    .map-node.completed {
+      background-color: var(--color-gemini);
+      box-shadow: 0 0 12px 4px rgba(90, 169, 255, 0.3);
+    }
+
+    .node-label {
+      position: absolute;
+      font-family: var(--font-header);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+      transition: var(--transition-main);
+    }
+
+    .map-node.active + .node-label,
+    .map-node.completed + .node-label {
+      color: var(--color-text-main);
+    }
+
+    /* Route lines */
+    .route-path {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-width: 2;
+    }
+
+    .route-active-path {
+      fill: none;
+      stroke: url(#active-grad);
+      stroke-width: 3.5;
+      stroke-linecap: round;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      transition: stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Grids & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .glass-card {
+      background: var(--color-bg-card);
+      border-radius: 16px;
+      padding: 1.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      transition: var(--transition-main);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(90, 169, 255, 0.25);
+      transform: translateY(-4px);
+    }
+
+    /* Bullet point sparkles */
+    .bullet-list {
+      list-style: none;
+    }
+
+    .bullet-list li {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      padding-left: 2rem;
+      position: relative;
+      color: var(--color-text-muted);
+    }
+
+    .bullet-list li strong {
+      color: var(--color-text-main);
+    }
+
+    .bullet-list li::before {
+      content: "✦";
+      position: absolute;
+      left: 0;
+      color: var(--color-gold);
+      animation: pulseSparkle 3s infinite ease-in-out;
+    }
+
+    @keyframes pulseSparkle {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.25); opacity: 1; color: var(--color-glow); }
+    }
+
+    /* Typography */
+    h1 {
+      font-family: var(--font-header);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--color-text-main);
+      margin-bottom: 1.5rem;
+    }
+
+    .title-giant {
+      font-size: 5rem;
+      background: linear-gradient(135deg, #FFF 30%, var(--color-teal) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-family: var(--font-header);
+      font-weight: 600;
+      font-size: 2.6rem;
+      letter-spacing: -0.02em;
+      color: var(--color-text-main);
+      margin-bottom: 1.5rem;
+    }
+
+    h3 {
+      font-family: var(--font-header);
+      font-weight: 600;
+      font-size: 1.35rem;
+      color: var(--color-text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: var(--color-text-muted);
+    }
+
+    .highlight-lead {
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--color-teal);
+      margin-bottom: 2rem;
+      line-height: 1.4;
+    }
+
+    /* Staggered animations */
+    .animate-fade {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active .animate-fade {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+
+    /* Flow blocks */
+    .chain-flow {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .chain-step {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 0.8rem 1.2rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+
+    .chain-step.active {
+      border-color: var(--color-teal);
+      color: var(--color-text-main);
+      box-shadow: 0 0 15px rgba(102, 227, 211, 0.15);
+    }
+
+    .chain-arrow {
+      color: var(--color-gold);
+    }
+
+    /* Persona slide card */
+    .persona-card {
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .persona-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--color-glow) 0%, var(--color-teal) 100%);
+      box-shadow: 0 0 20px rgba(157, 124, 255, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+    }
+
+    /* Controls footer */
+    .deck-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2.2rem 8%;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      z-index: 5;
+      background-color: var(--color-bg-base);
+    }
+
+    .progress-bar-container {
+      flex-grow: 1;
+      height: 4px;
+      background-color: rgba(255,255,255,0.05);
+      margin: 0 4rem;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-teal), var(--color-gemini));
+      width: 10%;
+      transition: var(--transition-main);
+    }
+
+    .slide-number {
+      font-family: var(--font-header);
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Spaced apart non-circular navigation buttons */
+    .nav-buttons {
+      display: flex;
+      gap: 3rem;
+    }
+
+    .btn-nav {
+      background-color: transparent;
+      color: var(--color-text-main);
+      border: none;
+      width: auto;
+      height: auto;
+      padding: 0.5rem;
+      cursor: pointer;
+      font-size: 1.8rem;
+      transition: var(--transition-fast);
+    }
+
+    .btn-nav:hover:not(:disabled) {
+      color: var(--color-teal);
+      transform: scale(1.15);
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.15;
+      cursor: not-allowed;
+    }
+
+    /* Architecture visual flows */
+    .arch-flow-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      width: 100%;
+      margin-top: 1.5rem;
+    }
+
+    .arch-flow-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .arch-flow-node {
+      background: rgba(15, 22, 36, 0.6);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 1.2rem;
+      text-align: center;
+      flex-grow: 1;
+      max-width: 230px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      transition: var(--transition-main);
+    }
+
+    .arch-flow-node.active-highlight {
+      border-color: var(--color-teal);
+      color: var(--color-text-main);
+      box-shadow: 0 0 20px rgba(102, 227, 211, 0.2);
+    }
+
+    .arch-flow-node.active-mcp {
+      border-color: var(--color-gold);
+      color: var(--color-text-main);
+      box-shadow: 0 0 20px rgba(244, 201, 93, 0.2);
+    }
+
+    .arch-flow-node.active-ai {
+      border-color: var(--color-gemini);
+      color: var(--color-text-main);
+      box-shadow: 0 0 20px rgba(90, 169, 255, 0.25);
+    }
+
+    /* Step flow */
+    .step-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .step-item {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .step-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    .step-item.active-step .step-badge {
+      background-color: var(--color-teal);
+      border-color: var(--color-teal);
+      color: var(--color-bg-base);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cinematic Ambient Background -->
+  <div class="aurora-bg">
+    <div class="aurora-orb aurora-1" id="orb-1"></div>
+    <div class="aurora-orb aurora-2" id="orb-2"></div>
+  </div>
+
+  <div class="presentation-layout" id="layout">
+    
+    <!-- Left Side: Slides -->
+    <div class="deck-container">
+      
+      <!-- Slide 1: Title -->
+      <div class="slide active" id="slide-0">
+        <h1 class="title-giant animate-fade">TravelWell</h1>
+        <p class="highlight-lead animate-fade delay-1">“Travel intelligence that knows what comes next.”</p>
+        
+        <p class="animate-fade delay-2" style="font-size: 1.4rem; max-width: 700px; color: var(--color-text-main); margin-bottom: 2rem;">
+          “Travel systems manage bookings. TravelWell manages the traveler.”
+        </p>
+
+        <!-- Proactive chain flow visual -->
+        <div class="chain-flow animate-fade delay-3">
+          <div class="chain-step active">AA100 Delayed</div>
+          <div class="chain-arrow">➔</div>
+          <div class="chain-step">Arrival Shifted</div>
+          <div class="chain-arrow">➔</div>
+          <div class="chain-step">Dinner Adjusted</div>
+          <div class="chain-arrow">➔</div>
+          <div class="chain-step">Workout Shortened</div>
+        </div>
+      </div>
+
+      <!-- Slide 2: The Problem -->
+      <div class="slide" id="slide-1">
+        <h2 class="animate-fade">The Problem</h2>
+        <p class="highlight-lead animate-fade delay-1">Existing travel engines manage transactions, not traveler health.</p>
+        <div class="glass-card animate-fade delay-2">
+          <p>
+            Travel data is heavily fragmented across airlines, hotels, transport networks, and email folders. The human traveler is left to manually coordinate dietary needs, fitness schedules, and stress management reactively when delays occur.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 3: The Insight -->
+      <div class="slide" id="slide-2" data-layout="full">
+        <h2 class="animate-fade">The Core Insight</h2>
+        <p class="highlight-lead animate-fade delay-1">Optimize the traveler, not just the itinerary.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;" class="animate-fade delay-2">
+          <!-- Card 1: Sabre Context -->
+          <div class="glass-card">
+            <h3 style="color: var(--color-gold); margin-bottom: 0.8rem;">Sabre Context</h3>
+            <ul class="bullet-list" style="font-size: 0.95rem; padding-left: 0;">
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Live trip and booking information</li>
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Flight status and timing</li>
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Verified travel parameters</li>
+            </ul>
+          </div>
+          <!-- Card 2: Traveler Memory -->
+          <div class="glass-card">
+            <h3 style="color: var(--color-teal); margin-bottom: 0.8rem;">Traveler Memory</h3>
+            <ul class="bullet-list" style="font-size: 0.95rem; padding-left: 0;">
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Preferences and habits</li>
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Connected memberships</li>
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Wellness routines</li>
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Loyalty and brand choices</li>
+            </ul>
+          </div>
+          <!-- Card 3: Vocal Bridge -->
+          <div class="glass-card">
+            <h3 style="color: var(--color-coral); margin-bottom: 0.8rem;">Vocal Bridge</h3>
+            <ul class="bullet-list" style="font-size: 0.95rem; padding-left: 0;">
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Natural voice conversation</li>
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Voice trip selection</li>
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Gathering missing context</li>
+              <li style="margin-bottom: 0.5rem; font-size: 0.95rem;">Traveler voice approvals</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="animate-fade delay-3" style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.5rem;">
+          <p style="font-size: 1.3rem; color: var(--color-text-main); font-weight: 500; text-align: center; margin-bottom: 0.5rem;">
+            Sabre knows the trip. &middot; TravelWell knows the traveler. &middot; Vocal Bridge makes it conversational.
+          </p>
+          <p style="font-size: 1.1rem; color: var(--color-text-muted); text-align: center; font-style: italic;">
+            Together, they create proactive personal travel intelligence.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 4: Meet Jim (Full Width Slide) -->
+      <div class="slide" id="slide-3" data-layout="full">
+        <h2 class="animate-fade">Meet Jim Scrivner</h2>
+        <p class="highlight-lead animate-fade delay-1">“Sabre knows Jim’s trip. TravelWell knows Jim.”</p>
+        
+        <div class="grid-2 animate-fade delay-2">
+          <div class="glass-card persona-card">
+            <div class="persona-avatar">JS</div>
+            <div>
+              <h3>Jim Scrivner</h3>
+              <p style="font-size: 0.95rem;">Frequent Business Traveler</p>
+              <p style="font-size: 0.95rem; font-style: italic; color: var(--color-gold); margin-top: 0.3rem;">
+                “I want my routine to travel with me.”
+              </p>
+            </div>
+          </div>
+          <div class="glass-card">
+            <ul class="bullet-list" style="font-size: 1.05rem;">
+              <li><strong>Connected Memberships:</strong> AA AAdvantage & Marriott Bonvoy.</li>
+              <li><strong>Wellness Profile:</strong> High-protein, vegetable-forward diet.</li>
+              <li><strong>Fitness Style:</strong> Short, efficient 25-minute indoor workouts.</li>
+              <li><strong>Goal:</strong> Reduced-stress travel transitions.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 5: Chicago Demo Story -->
+      <div class="slide" id="slide-4">
+        <h2 class="animate-fade">Journey to Chicago</h2>
+        <p style="color: var(--color-coral); font-style: italic; font-size: 1.15rem; margin-bottom: 1.5rem;" class="animate-fade delay-1">
+          “Got it. AA100 is currently delayed. I don’t have your hotel or rental-car details yet. Where are you staying?”
+        </p>
+
+        <div class="step-timeline animate-fade delay-2">
+          <div class="step-item active-step">
+            <div class="step-badge">1</div>
+            <div><p style="font-size: 1rem; color: var(--color-text-main);">American Airlines account connected & active.</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-badge">2</div>
+            <div><p style="font-size: 1rem;">Chicago trip selected by voice dialogue.</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-badge">3</div>
+            <div><p style="font-size: 1rem;">Sabre verifies flight AA100 and reports delay status.</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-badge">4</div>
+            <div><p style="font-size: 1rem;">TravelWell identifies missing hotel and rental context.</p></div>
+          </div>
+          <div class="step-item">
+            <div class="step-badge">5</div>
+            <div><p style="font-size: 1rem;">Jim supplies hotel detail; proactive cards activate.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 6: Proactive Cards (Grid Layout) -->
+      <div class="slide" id="slide-5" data-layout="full">
+        <h2 class="animate-fade">Proactive Intelligence Cards</h2>
+        <p class="highlight-lead animate-fade delay-1">Contextualized suggestions based on real-time delays</p>
+        
+        <div class="grid-4 animate-fade delay-2">
+          <div class="glass-card">
+            <h3 style="color: var(--color-gemini);">Admirals Club</h3>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--color-text-muted);">
+              <strong>Why:</strong> AA100 Delayed.<br>
+              <strong>Fits:</strong> Quiet lounge near Gate H14.<br>
+              <strong>Source:</strong> Sabre Flight Context.<br>
+              <strong>Action:</strong> Check-in pass.
+            </p>
+          </div>
+          <div class="glass-card">
+            <h3 style="color: var(--color-teal);">Healthy Dinner</h3>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--color-text-muted);">
+              <strong>Why:</strong> Delayed arrival.<br>
+              <strong>Fits:</strong> Organic, veggie dining at True Food.<br>
+              <strong>Source:</strong> Google Places.<br>
+              <strong>Action:</strong> Order ahead.
+            </p>
+          </div>
+          <div class="glass-card">
+            <h3 style="color: var(--color-gold);">Hotel Gym</h3>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--color-text-muted);">
+              <strong>Why:</strong> Pre-checkout window.<br>
+              <strong>Fits:</strong> 25-minute workout at Marriott.<br>
+              <strong>Source:</strong> Traveler Memory.<br>
+              <strong>Action:</strong> Add to calendar.
+            </p>
+          </div>
+          <div class="glass-card">
+            <h3 style="color: var(--color-coral);">Transport Timing</h3>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--color-text-muted);">
+              <strong>Why:</strong> Heavy local transit.<br>
+              <strong>Fits:</strong> Transit reservation matching flight ETA.<br>
+              <strong>Source:</strong> Google Maps.<br>
+              <strong>Action:</strong> Schedule ride.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 7: Voice-to-Action Approval Loop -->
+      <div class="slide" id="slide-6">
+        <h2 class="animate-fade">Voice-to-Action Workflow</h2>
+        <p class="highlight-lead animate-fade delay-1">Action Gated by Traveler Approval</p>
+        <div class="glass-card animate-fade delay-2">
+          <p>
+            Vocal Bridge stream routes voice commands to FastAPI. Gemini on Vertex AI processes the user intent, queries the Sabre MCP Skills server, and updates the itinerary. No reservation is finalized without the traveler's voice approval.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 8: System Architecture (Full Width Slide) -->
+      <div class="slide" id="slide-7" data-layout="full">
+        <h2 class="animate-fade">System Architecture</h2>
+        <p class="highlight-lead animate-fade delay-1">Proactive Concierge Topology</p>
+        
+        <div class="arch-flow-visual animate-fade delay-2">
+          <div class="arch-flow-row">
+            <div class="arch-flow-node active-highlight">Jim (Voice)</div>
+            <div class="arch-arrow">➔</div>
+            <div class="arch-flow-node active-highlight">Vocal Bridge WebRTC</div>
+            <div class="arch-arrow">➔</div>
+            <div class="arch-flow-node active-highlight">React UI / FastAPI (Cloud Run)</div>
+          </div>
+          <div class="arch-flow-row">
+            <div class="arch-arrow" style="visibility: hidden;">➔</div>
+            <div class="arch-arrow" style="visibility: hidden;">➔</div>
+            <div class="arch-arrow">▼</div>
+          </div>
+          <div class="arch-flow-row">
+            <div class="arch-flow-node active-mcp">Sabre MCP Skills</div>
+            <div class="arch-arrow">⇆</div>
+            <div class="arch-flow-node active-ai">Gemini on Vertex AI (ADK)</div>
+            <div class="arch-arrow">⇆</div>
+            <div class="arch-flow-node active-mcp">Traveler Profile Memory</div>
+          </div>
+          <div class="arch-flow-row">
+            <div class="arch-arrow" style="visibility: hidden;">➔</div>
+            <div class="arch-arrow" style="visibility: hidden;">➔</div>
+            <div class="arch-arrow">▼</div>
+          </div>
+          <div class="arch-flow-row">
+            <div class="arch-flow-node active-highlight">Proactive Intelligence</div>
+            <div class="arch-arrow">➔</div>
+            <div class="arch-flow-node active-highlight">Traveler Approval Loop</div>
+            <div class="arch-arrow">➔</div>
+            <div class="arch-flow-node active-highlight">UI & Voice response</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 9: Demo Transition -->
+      <div class="slide" id="slide-8">
+        <h2 class="animate-fade">Let's meet Jim's travel buddy</h2>
+        <p class="highlight-lead animate-fade delay-1">Voice &middot; Verified Context &middot; Personalized Action</p>
+        <div class="glass-card animate-fade delay-2">
+          <p style="color: var(--color-gemini); font-style: italic; font-size: 1.3rem; line-height: 1.6;">
+            “Welcome back, Jim. I found your Chicago and Austin trips. Which one are we working on?”
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 10: Vision & Impact -->
+      <div class="slide" id="slide-9">
+        <h2 class="animate-fade">Vision & Impact</h2>
+        <p class="highlight-lead animate-fade delay-1">Empowering healthier, stress-free journeys globally</p>
+        <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 2rem;" class="animate-fade delay-2">
+          <div class="glass-card">
+            <ul class="bullet-list" style="font-size: 1.1rem;">
+              <li><strong>Loyalty & Pacing:</strong> Healthier food and structured exercise loops.</li>
+              <li><strong>Scalability:</strong> Connected accounts across airlines, hotels, and retail.</li>
+            </ul>
+          </div>
+          <div class="glass-card" style="background: rgba(45, 106, 79, 0.15); border-color: var(--color-green);">
+            <h3 style="color: var(--color-teal);">Tech Stack</h3>
+            <p style="color: var(--color-text-main); font-size: 0.95rem; line-height: 1.7; margin-top: 0.5rem;">
+              Sabre MCP Skills &bull; Vocal Bridge &bull; Gemini on Vertex AI &bull; Google Cloud Run
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Side: Persistent Journey Map (30%) -->
+    <div class="map-panel">
+      <div class="journey-map-container">
+        <div class="map-grid"></div>
+        
+        <svg width="100%" height="100%" style="position: absolute; z-index: 2;">
+          <defs>
+            <linearGradient id="active-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="var(--color-teal)" />
+              <stop offset="100%" stop-color="var(--color-gemini)" />
+            </linearGradient>
+            <filter id="glow-filter" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
+          
+          <!-- Static network base lines -->
+          <path class="route-path" d="M 60 360 Q 140 280 180 200" />
+          <path class="route-path" d="M 180 200 Q 200 120 220 80" />
+          
+          <!-- Dynamic active route lines -->
+          <path id="route-ind-ord" class="route-active-path" d="M 60 360 Q 140 280 180 200" filter="url(#glow-filter)" />
+          <path id="route-ord-aus" class="route-active-path" d="M 180 200 Q 200 120 220 80" filter="url(#glow-filter)" />
+        </svg>
+
+        <!-- Node 1: Indianapolis -->
+        <div class="map-node" id="node-ind" style="left: 54px; top: 354px;"></div>
+        <div class="node-label" style="left: 80px; top: 350px;">IND</div>
+
+        <!-- Node 2: Chicago -->
+        <div class="map-node" id="node-ord" style="left: 174px; top: 194px;"></div>
+        <div class="node-label" style="left: 200px; top: 190px;">ORD</div>
+
+        <!-- Node 3: Austin -->
+        <div class="map-node" id="node-aus" style="left: 214px; top: 74px;"></div>
+        <div class="node-label" style="left: 240px; top: 70px;">AUS</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Slide Footer -->
+  <div class="deck-footer">
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progress"></div>
+    </div>
+    
+    <div style="display: flex; align-items: center; gap: 2.5rem;">
+      <span class="slide-number" id="slide-counter">Slide 1 of 10</span>
+      <div class="nav-buttons">
+        <button class="btn-nav" id="btn-prev" onclick="prevSlide()" disabled>&larr;</button>
+        <button class="btn-nav" id="btn-next" onclick="nextSlide()">&rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progress');
+    const slideCounter = document.getElementById('slide-counter');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const layoutContainer = document.getElementById('layout');
+    
+    // Journey map node/route elements
+    const nodeInd = document.getElementById('node-ind');
+    const nodeOrd = document.getElementById('node-ord');
+    const nodeAus = document.getElementById('node-aus');
+    const routeIndOrd = document.getElementById('route-ind-ord');
+    const routeOrdAus = document.getElementById('route-ord-aus');
+
+    // Orbs for aurora backgrounds
+    const orb1 = document.getElementById('orb-1');
+    const orb2 = document.getElementById('orb-2');
+
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+
+    function updateJourneyMap() {
+      // Clear active/completed states
+      nodeInd.classList.remove('active', 'completed');
+      nodeOrd.classList.remove('active', 'completed');
+      nodeAus.classList.remove('active', 'completed');
+      
+      if (currentSlide <= 3) {
+        // IND active, routes unlit
+        nodeInd.classList.add('active');
+        routeIndOrd.style.strokeDashoffset = '200';
+        routeOrdAus.style.strokeDashoffset = '200';
+      } else if (currentSlide >= 4 && currentSlide <= 7) {
+        // ORD active, IND completed, Route 1 lit
+        nodeInd.classList.add('completed');
+        nodeOrd.classList.add('active');
+        routeIndOrd.style.strokeDashoffset = '0';
+        routeOrdAus.style.strokeDashoffset = '200';
+      } else {
+        // AUS active, IND & ORD completed, Route 1 & 2 lit
+        nodeInd.classList.add('completed');
+        nodeOrd.classList.add('completed');
+        nodeAus.classList.add('active');
+        routeIndOrd.style.strokeDashoffset = '0';
+        routeOrdAus.style.strokeDashoffset = '0';
+      }
+    }
+
+    function updateDeck() {
+      const activeSlide = slides[currentSlide];
+      
+      // Update full width layout class
+      if (activeSlide.getAttribute('data-layout') === 'full') {
+        layoutContainer.classList.add('layout-full');
+      } else {
+        layoutContainer.classList.remove('layout-full');
+      }
+
+      slides.forEach((slide, idx) => {
+        slide.classList.remove('active', 'prev');
+        if (idx === currentSlide) {
+          slide.classList.add('active');
+        } else if (idx < currentSlide) {
+          slide.classList.add('prev');
+        }
+      });
+
+      // Update progress bar
+      const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+      
+      // Update text counters
+      slideCounter.innerText = `Slide ${currentSlide + 1} of ${totalSlides}`;
+      
+      // Update buttons
+      btnPrev.disabled = currentSlide === 0;
+      btnNext.disabled = currentSlide === totalSlides - 1;
+
+      // Update journey map
+      updateJourneyMap();
+
+      // Shift aurora orb positions dynamically to create parallax sense
+      orb1.style.transform = `translate(${currentSlide * 12}px, ${currentSlide * 8}px)`;
+      orb2.style.transform = `translate(${-currentSlide * 16}px, ${-currentSlide * 10}px)`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateDeck();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateDeck();
+      }
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+
+    // Initialize
+    updateDeck();
+  </script>
+</body>
+</html>
