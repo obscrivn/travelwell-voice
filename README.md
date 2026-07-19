@@ -10,6 +10,30 @@ TravelWell Voice is a proactive travel intelligence and wellness platform. It in
 
 The system consists of a Vite React frontend, a FastAPI backend running on Cloud Run, and a single Vertex AI Gemini reasoning agent managing custom tools.
 
+```mermaid
+graph TD
+    classDef traveler fill:#e8f0fe,stroke:#4285f4,stroke-width:2px,color:#000;
+    classDef voice fill:#fce8e6,stroke:#ea4335,stroke-width:2px,color:#000;
+    classDef client fill:#e6f4ea,stroke:#34a853,stroke-width:2px,color:#000;
+    classDef server fill:#fef7e0,stroke:#fbbc05,stroke-width:2px,color:#000;
+    classDef external fill:#f3e8fd,stroke:#ab47bc,stroke-width:2px,color:#000;
+
+    Jim["Jim / Traveler"]:::traveler
+    VB["Vocal Bridge SDK & Cloud"]:::voice
+    FE["React Frontend (Vite + TS)"]:::client
+    BE["FastAPI Backend (Cloud Run)"]:::server
+    Gemini["Gemini Agent (Vertex AI ADK)"]:::server
+    Sabre["Sabre Remote MCP Server"]:::external
+    Memory["Traveler Memory (Profiles)"]:::server
+
+    Jim <-->|Voice Dialogue| VB
+    VB <-->|WebRTC Audio Stream| FE
+    FE <-->|API Calls & SSE| BE
+    BE <-->|Orchestration| Gemini
+    Gemini <-->|sabre_tools| Sabre
+    Gemini <-->|profile_tools| Memory
+```
+
 ```
        [ Jim / Traveler ]
                │

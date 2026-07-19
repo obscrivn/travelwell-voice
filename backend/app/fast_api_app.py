@@ -127,6 +127,11 @@ def collect_feedback(feedback: Feedback) -> dict[str, str]:
     return {"status": "success"}
 
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+
 @app.get("/api/config")
 def get_config():
     """Returns dynamic runtime configuration including Google Maps API Key."""
